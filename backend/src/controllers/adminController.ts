@@ -14,18 +14,25 @@ export const getDashboardStats = async (_req: AuthRequest, res: Response): Promi
         const [
             totalUsers, activeUsers, pendingUsers,
             todayRegistrations, todayActivations,
-            businessAgg, selfRewardAgg, directBonusAgg, teamBonusAgg,
-            totalDeals, pendingInvestments,
         ] = await Promise.all([
             prisma.user.count({ where: { role: 'USER' } }),
             prisma.user.count({ where: { role: 'USER', status: 'ACTIVE' } }),
             prisma.user.count({ where: { role: 'USER', status: 'PENDING' } }),
             prisma.user.count({ where: { role: 'USER', createdAt: { gte: today } } }),
             prisma.user.count({ where: { role: 'USER', activatedAt: { gte: today } } }),
-            prisma.user.aggregate({ where: { role: 'USER' }, _sum: { totalBusiness: true } }),
-            prisma.user.aggregate({ where: { role: 'USER' }, _sum: { selfReward: true } }),
-            prisma.user.aggregate({ where: { role: 'USER' }, _sum: { directBonus: true } }),
-            prisma.user.aggregate({ where: { role: 'USER' }, _sum: { teamBonus: true } }),
+        ]);
+
+        const userAggs = await prisma.user.aggregate({
+            where: { role: 'USER' },
+            _sum: {
+                totalBusiness: true,
+                selfReward: true,
+                directBonus: true,
+                teamBonus: true,
+            }
+        });
+
+        const [totalDeals, pendingInvestments] = await Promise.all([
             prisma.propertyDeal.count(),
             prisma.investment.count({ where: { status: 'PENDING' } }),
         ]);
@@ -35,10 +42,10 @@ export const getDashboardStats = async (_req: AuthRequest, res: Response): Promi
             data: {
                 totalUsers, activeUsers, pendingUsers,
                 todayRegistrations, todayActivations,
-                totalBusiness: businessAgg._sum.totalBusiness || 0,
-                totalSelfReward: selfRewardAgg._sum.selfReward || 0,
-                totalDirectBonus: directBonusAgg._sum.directBonus || 0,
-                totalTeamBonus: teamBonusAgg._sum.teamBonus || 0,
+                totalBusiness: userAggs._sum.totalBusiness || 0,
+                totalSelfReward: userAggs._sum.selfReward || 0,
+                totalDirectBonus: userAggs._sum.directBonus || 0,
+                totalTeamBonus: userAggs._sum.teamBonus || 0,
                 totalDeals, pendingInvestments,
             },
         });

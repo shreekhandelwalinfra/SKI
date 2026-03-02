@@ -15,7 +15,7 @@
 
   --text-primary: #1A1A24;
   --text-secondary: #4A4A5A;
-  --text-muted: #7A7A8A;
+  --text-muted: #5A5A6A;
   --text-heading: #1A1A24;
 
   --accent-copper: #B5845A;
@@ -30,10 +30,10 @@
   --navy-light: #243358;
   --navy-text: #F5F0EB;
 
-  --hero-overlay: linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.55) 60%, rgba(0,0,0,0.75) 100%);
-  --card-shadow: 0 2px 16px rgba(0,0,0,0.08);
-  --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.12);
-  
+  --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.55) 60%, rgba(0, 0, 0, 0.75) 100%);
+  --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.08);
+  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.1);
@@ -58,14 +58,47 @@
   --border-color: #333340;
   --border-subtle: #2A2A34;
 
-  --hero-overlay: linear-gradient(180deg, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 60%, rgba(0,0,0,0.8) 100%);
-  --card-shadow: 0 2px 16px rgba(0,0,0,0.3);
-  --card-hover-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  --hero-overlay: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.6) 60%, rgba(0, 0, 0, 0.8) 100%);
+  --card-shadow: 0 2px 16px rgba(0, 0, 0, 0.3);
+  --card-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
   --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+
+  /* Admin Panel — Dark Mode (deep navy) */
+  --admin-bg: #0A0D12;
+  --admin-surface: #0F1318;
+  --admin-surface-2: #141920;
+  --admin-surface-3: #1A2030;
+  --admin-border: rgba(196, 149, 106, 0.08);
+  --admin-border-bright: rgba(196, 149, 106, 0.18);
+  --admin-text-primary: #F5F0EB;
+  --admin-text-secondary: #C0B8AE;
+  --admin-text-muted: #7A7A8A;
+  --admin-sidebar-bg: linear-gradient(180deg, #0D0D18 0%, #111120 60%, #0A0A14 100%);
+  --admin-header-bg: rgba(7, 7, 16, 0.85);
+  --admin-modal-bg: rgba(20, 25, 32, 0.97);
+  --admin-card-bg: rgba(15, 19, 24, 0.9);
 }
+
+[data-theme="light"] {
+  /* Admin Panel — Light Mode (warm cream + ivory) */
+  --admin-bg: #F5F0EB;
+  --admin-surface: #FFFFFF;
+  --admin-surface-2: #FAF7F4;
+  --admin-surface-3: #F0EBE4;
+  --admin-border: rgba(180, 130, 80, 0.15);
+  --admin-border-bright: rgba(180, 130, 80, 0.3);
+  --admin-text-primary: #1A1A24;
+  --admin-text-secondary: #4A4A5A;
+  --admin-text-muted: #7A7A8A;
+  --admin-sidebar-bg: linear-gradient(180deg, #1B2A4A 0%, #243358 60%, #1A2844 100%);
+  --admin-header-bg: rgba(245, 240, 235, 0.92);
+  --admin-modal-bg: rgba(255, 255, 255, 0.98);
+  --admin-card-bg: #FFFFFF;
+}
+
 
 /* ============================================
    Base Styles
@@ -91,7 +124,12 @@ body {
   transition: background-color 0.4s ease, color 0.4s ease;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: var(--font-playfair), Georgia, 'Times New Roman', serif;
   font-weight: 700;
   line-height: 1.2;
@@ -325,6 +363,7 @@ img {
     opacity: 0;
     transform: translateY(30px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -332,8 +371,13 @@ img {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .animate-fadeInUp {
@@ -436,8 +480,13 @@ textarea.input {
    ============================================ */
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
@@ -445,4 +494,456 @@ textarea.input {
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
   border-radius: 4px;
+}
+
+/* ============================================
+   Admin Panel Design System
+   Luxury Real Estate — Navy & Copper Aesthetic
+   These theme-neutral values stay in :root.
+   Background/surface/border variables are set
+   exclusively in [data-theme="dark"] and
+   [data-theme="light"] blocks above.
+   ============================================ */
+
+:root {
+  /* Glow colors - copper & warm tones (theme-neutral) */
+  --glow-copper: rgba(196, 149, 106, 0.4);
+  --glow-gold: rgba(212, 165, 116, 0.35);
+  --glow-emerald: rgba(16, 185, 129, 0.3);
+  --glow-amber: rgba(245, 158, 11, 0.3);
+  --glow-rose: rgba(244, 63, 94, 0.3);
+  --glow-slate: rgba(148, 163, 184, 0.2);
+  --glow-navy: rgba(27, 42, 74, 0.5);
+
+  /* Named accent colors - real estate palette (same in both themes) */
+  --admin-copper: #C4956A;
+  --admin-copper-light: #D4A574;
+  --admin-copper-subtle: rgba(196, 149, 106, 0.12);
+  --admin-navy: #1B2A4A;
+  --admin-navy-light: #243358;
+  --admin-emerald: #10b981;
+  --admin-amber: #f59e0b;
+  --admin-rose: #f43f5e;
+  --admin-slate: #94a3b8;
+}
+
+/* Glassmorphism card — uses theme variables */
+.glass-card {
+  background: var(--admin-card-bg, rgba(15, 19, 24, 0.9));
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--admin-border);
+  border-radius: 16px;
+  transition: all 0.3s ease;
+}
+
+.glass-card:hover {
+  border-color: var(--admin-border-bright);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+/* Gradient border card — copper tone */
+.gradient-border-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(196, 149, 106, 0.4), rgba(212, 165, 116, 0.2), rgba(27, 42, 74, 0.6));
+  transition: all 0.3s ease;
+}
+
+.gradient-border-card:hover {
+  background: linear-gradient(135deg, rgba(196, 149, 106, 0.7), rgba(212, 165, 116, 0.5), rgba(27, 42, 74, 0.8));
+  box-shadow: 0 0 25px rgba(196, 149, 106, 0.15);
+}
+
+.gradient-border-inner {
+  background: var(--admin-surface);
+  border-radius: 15px;
+  height: 100%;
+  width: 100%;
+}
+
+/* Glow badges */
+.glow-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.glow-badge-green {
+  background: rgba(16, 185, 129, 0.12);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.15);
+}
+
+.glow-badge-amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.15);
+}
+
+.glow-badge-rose {
+  background: rgba(244, 63, 94, 0.12);
+  color: #f43f5e;
+  border: 1px solid rgba(244, 63, 94, 0.25);
+  box-shadow: 0 0 8px rgba(244, 63, 94, 0.15);
+}
+
+.glow-badge-blue {
+  background: rgba(59, 130, 246, 0.12);
+  color: #3b82f6;
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.15);
+}
+
+.glow-badge-copper {
+  background: rgba(196, 149, 106, 0.12);
+  color: #C4956A;
+  border: 1px solid rgba(196, 149, 106, 0.25);
+  box-shadow: 0 0 8px rgba(196, 149, 106, 0.15);
+}
+
+/* Pill button */
+.pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 16px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-family: var(--font-inter), sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.25s ease;
+}
+
+.pill-btn-navy {
+  background: rgba(27, 42, 74, 0.5);
+  color: #94a3b8;
+  border: 1px solid rgba(196, 149, 106, 0.15);
+}
+
+.pill-btn-navy:hover {
+  background: rgba(27, 42, 74, 0.8);
+  color: #C4956A;
+  border-color: rgba(196, 149, 106, 0.35);
+}
+
+.pill-btn-copper {
+  background: rgba(196, 149, 106, 0.12);
+  color: #C4956A;
+  border: 1px solid rgba(196, 149, 106, 0.3);
+}
+
+.pill-btn-copper:hover,
+.pill-btn-copper.active {
+  background: rgba(196, 149, 106, 0.25);
+  box-shadow: 0 0 15px var(--glow-copper);
+}
+
+.pill-btn-active {
+  background: linear-gradient(135deg, #C4956A, #D4A574);
+  color: #fff !important;
+  border-color: transparent !important;
+  box-shadow: 0 0 18px rgba(196, 149, 106, 0.45) !important;
+}
+
+/* Admin stat card */
+.admin-stat-card {
+  position: relative;
+  border-radius: 16px;
+  padding: 1.5rem;
+  background: var(--admin-surface-2);
+  border: 1px solid var(--admin-border);
+  overflow: hidden;
+  transition: all 0.35s ease;
+}
+
+.admin-stat-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  border-radius: 16px 16px 0 0;
+  background: linear-gradient(90deg, transparent, var(--stat-color, #C4956A), transparent);
+  opacity: 0.9;
+}
+
+.admin-stat-card:hover {
+  border-color: var(--admin-border-bright);
+  transform: translateY(-3px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 20px var(--stat-glow, rgba(196, 149, 106, 0.15));
+}
+
+/* Stat icon circle */
+.stat-icon-circle {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* Admin table */
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.82rem;
+}
+
+.admin-table thead tr {
+  border-bottom: 1px solid var(--admin-border-bright);
+}
+
+.admin-table thead th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--admin-text-muted, #7A7A8A);
+}
+
+.admin-table tbody tr {
+  border-bottom: 1px solid var(--admin-border);
+  transition: background 0.2s ease;
+}
+
+.admin-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+  background: rgba(196, 149, 106, 0.04);
+}
+
+.admin-table tbody td {
+  padding: 0.8rem 1rem;
+  color: var(--admin-text-secondary, #C0B8AE);
+  vertical-align: middle;
+}
+
+/* Admin input — uses theme variables */
+.admin-input {
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--admin-surface-3);
+  color: var(--admin-text-primary, #F5F0EB);
+  border: 1px solid var(--admin-border-bright);
+  border-radius: 10px;
+  font-family: var(--font-inter), sans-serif;
+  font-size: 0.88rem;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.admin-input:focus {
+  border-color: #C4956A;
+  box-shadow: 0 0 0 3px rgba(196, 149, 106, 0.12);
+}
+
+/* Pulse glow animation */
+@keyframes pulseGlow {
+
+  0%,
+  100% {
+    opacity: 0.6;
+  }
+
+  50% {
+    opacity: 1;
+  }
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-slideInUp {
+  animation: slideInUp 0.4s ease forwards;
+}
+
+/* Admin header gradient line */
+.admin-header-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(196, 149, 106, 0.5), rgba(212, 165, 116, 0.3), transparent);
+}
+
+/* ============================================
+   THEME-AWARE UTILITY CLASSES
+   Use these instead of hardcoded inline colors!
+   They read from CSS variables, so they auto-
+   adapt to light/dark mode.
+   ============================================ */
+
+/* ---- Text Colors ---- */
+.u-text-heading {
+  color: var(--text-heading);
+}
+
+.u-text-body {
+  color: var(--text-primary);
+}
+
+.u-text-sub {
+  color: var(--text-secondary);
+}
+
+.u-text-muted {
+  color: var(--text-muted);
+}
+
+.u-text-copper {
+  color: var(--accent-copper);
+}
+
+/* ---- Backgrounds ---- */
+.u-bg-page {
+  background-color: var(--bg-primary);
+}
+
+.u-bg-card {
+  background-color: var(--bg-surface);
+}
+
+.u-bg-card-alt {
+  background-color: var(--bg-surface-alt);
+}
+
+.u-bg-elevated {
+  background-color: var(--bg-elevated);
+}
+
+.u-bg-copper-subtle {
+  background-color: var(--accent-copper-subtle);
+}
+
+/* ---- Borders ---- */
+.u-border {
+  border: 1px solid var(--border-color);
+}
+
+.u-border-subtle {
+  border: 1px solid var(--border-subtle);
+}
+
+.u-border-copper {
+  border: 1px solid var(--accent-copper);
+}
+
+/* ---- Progress Bar Track ----
+   Use this instead of rgba(255,255,255,0.05) which is invisible in light mode */
+.u-progress-track {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-surface-alt);
+}
+
+.u-progress-track-sm {
+  width: 100%;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--bg-surface-alt);
+}
+
+/* ---- Status Badge (generic) ---- */
+.u-badge {
+  display: inline-block;
+  padding: 0.2rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
+  font-weight: 500;
+  font-family: var(--font-inter), sans-serif;
+}
+
+.u-badge-success {
+  background: rgba(52, 211, 153, 0.1);
+  color: #34D399;
+}
+
+.u-badge-warning {
+  background: rgba(251, 191, 36, 0.1);
+  color: #FBBF24;
+}
+
+.u-badge-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+}
+
+.u-badge-info {
+  background: rgba(96, 165, 250, 0.1);
+  color: #60A5FA;
+}
+
+.u-badge-copper {
+  background: var(--accent-copper-subtle);
+  color: var(--accent-copper);
+}
+
+/* ---- Card (base) ---- */
+.u-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+/* ---- Alert Messages ---- */
+.u-alert-success {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: rgba(52, 211, 153, 0.08);
+  color: #34D399;
+  border: 1px solid rgba(52, 211, 153, 0.15);
+}
+
+.u-alert-error {
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  font-size: 0.85rem;
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+/* ---- Font Families (shorthand) ---- */
+.u-font-serif {
+  font-family: var(--font-playfair), Georgia, serif;
+}
+
+.u-font-sans {
+  font-family: var(--font-inter), sans-serif;
+}
+
+.u-font-mono {
+  font-family: monospace;
 }

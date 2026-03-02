@@ -37,7 +37,7 @@ export default function UserDashboardPage() {
         { label: 'Team Bonus', value: fmt(data.teamBonus), accent: '#34D399' },
         { label: 'Self Reward', value: fmt(data.selfReward), accent: '#FBBF24' },
         { label: 'Direct Bonus', value: fmt(data.directBonus), accent: '#F472B6' },
-        { label: 'Total Income', value: fmt(data.totalIncome), accent: '#A78BFA' },
+        { label: 'Total Income', value: fmt(data.totalIncome), accent: '#7C3AED' },
     ];
 
     return (
@@ -133,7 +133,7 @@ export default function UserDashboardPage() {
                                 <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', fontSize: '0.85rem', fontFamily: 'var(--font-inter), sans-serif' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Current Rank Req.</span><span style={{ color: 'var(--text-primary)' }}>{fmt(invRankConfig.selfInvestment)}</span></div>
                                     <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Your Investment</span><span style={{ color: '#60A5FA' }}>{fmt(data.selfInvestment)}</span></div>
-                                    {nextInvRankConfig && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Next Rank Req.</span><span style={{ color: '#A78BFA' }}>{fmt(nextInvRankConfig.selfInvestment)}</span></div>}
+                                    {nextInvRankConfig && <div style={{ display: 'flex', justifyContent: 'space-between' }}><span style={{ color: 'var(--text-muted)' }}>Next Rank Req.</span><span style={{ color: '#7C3AED' }}>{fmt(nextInvRankConfig.selfInvestment)}</span></div>}
                                 </div>
                                 <div style={{ marginTop: '1rem' }}>
                                     <div style={{ width: '100%', height: '6px', borderRadius: '3px', background: 'var(--bg-surface-alt)' }}>

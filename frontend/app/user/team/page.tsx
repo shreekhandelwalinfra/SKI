@@ -11,7 +11,7 @@ interface TeamNode {
     children: TeamNode[];
 }
 
-const levelColors: Record<number, string> = { 1: '#60A5FA', 2: '#A78BFA', 3: '#F472B6', 4: '#34D399', 5: '#FBBF24' };
+const levelColors: Record<number, string> = { 1: '#60A5FA', 2: '#7C3AED', 3: '#F472B6', 4: '#34D399', 5: '#FBBF24' };
 const getColor = (l: number) => levelColors[l] || '#8A8A96';
 
 function MemberCard({ node, expanded, toggleExpand }: { node: TeamNode; expanded: Record<string, boolean>; toggleExpand: (id: string) => void }) {
@@ -43,7 +43,7 @@ function MemberCard({ node, expanded, toggleExpand }: { node: TeamNode; expanded
                     <div><span style={{ color: 'var(--text-muted)' }}>Investment</span><br /><span style={{ fontWeight: 600, color: '#34D399' }}>{fmt(node.selfInvestment)}</span></div>
                     <div><span style={{ color: 'var(--text-muted)' }}>Business</span><br /><span style={{ fontWeight: 600, color: '#60A5FA' }}>{fmt(node.totalBusiness)}</span></div>
                     <div><span style={{ color: 'var(--text-muted)' }}>Rank</span><br /><span style={{ fontWeight: 600, color: 'var(--accent-copper)' }}>{node.rank || '—'}</span></div>
-                    <div><span style={{ color: 'var(--text-muted)' }}>Downline</span><br /><span style={{ fontWeight: 600, color: '#A78BFA' }}>{node.downlineCount}</span></div>
+                    <div><span style={{ color: 'var(--text-muted)' }}>Downline</span><br /><span style={{ fontWeight: 600, color: '#7C3AED' }}>{node.downlineCount}</span></div>
                 </div>
 
                 {/* Footer: email + date */}

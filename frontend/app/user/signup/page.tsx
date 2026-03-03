@@ -82,7 +82,7 @@ export default function UserSignupPage() {
                     {refCode && <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: '6px', fontSize: '0.85rem', background: 'var(--accent-copper-subtle)', color: 'var(--accent-copper)', border: '1px solid rgba(181,132,90,0.15)' }}>Referred by: <strong>{refCode}</strong></div>}
 
                     <form onSubmit={handleSubmit}>
-                        <div className="responsive-grid-2">
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
                             {[
                                 { key: 'name', label: 'Full Name', type: 'text', span: 1 },
                                 { key: 'phone', label: 'Phone', type: 'tel', span: 1 },

@@ -8,6 +8,7 @@ const navLinks = [
     { href: '/properties?category=residential-land', label: 'Residences' },
     { href: '/properties?category=commercial-land', label: 'Estates' },
     { href: '/properties', label: 'Urban Luxury' },
+    { href: '/earning-plan', label: 'Earning Plan' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },
 ];
@@ -110,18 +111,24 @@ export default function Navbar() {
                     </button>
 
                     {/* Auth Buttons */}
-                    <div className="flex items-center gap-3 ml-4">
+                    <div className="flex items-center gap-2 ml-4">
                         <Link
                             href="/user/login"
-                            className="nav-link px-4 py-2 rounded-lg transition-all"
-                            style={{ border: '1px solid var(--accent-copper)', color: 'var(--accent-copper)' }}
+                            className="nav-link px-3 py-1.5 transition-all"
+                            style={{ fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, color: 'rgba(245,240,235,0.55)' }}
                         >
                             Login
                         </Link>
                         <Link
                             href="/user/signup"
-                            className="px-4 py-2 rounded-lg text-white transition-all text-xs uppercase tracking-widest font-semibold"
-                            style={{ background: 'var(--accent-copper)' }}
+                            className="px-5 py-2 transition-all"
+                            style={{
+                                background: 'linear-gradient(135deg, #C4956A, #a87a50)',
+                                color: '#fff', fontSize: '0.65rem', letterSpacing: '0.12em',
+                                textTransform: 'uppercase', fontWeight: 700, borderRadius: '50px',
+                                boxShadow: '0 2px 12px rgba(196,149,106,0.25)',
+                                textDecoration: 'none',
+                            }}
                         >
                             Sign Up
                         </Link>
@@ -183,21 +190,27 @@ export default function Navbar() {
                         ))}
 
                         {/* Mobile Auth Buttons */}
-                        <div className="flex flex-col items-center gap-4 mt-4 pt-6" style={{ borderTop: '1px solid var(--accent-copper)', opacity: 0.3 }}>
+                        <div className="flex flex-col items-center gap-4 mt-4 pt-6" style={{ borderTop: '1px solid rgba(196,149,106,0.15)' }}>
                         </div>
                         <Link
                             href="/user/login"
                             onClick={() => setMobileOpen(false)}
-                            className="px-8 py-3 rounded-lg text-sm uppercase tracking-widest font-semibold transition-all"
-                            style={{ border: '1px solid var(--accent-copper)', color: 'var(--accent-copper)' }}
+                            className="transition-all"
+                            style={{ fontSize: '0.75rem', letterSpacing: '0.12em', textTransform: 'uppercase', fontWeight: 600, color: 'rgba(245,240,235,0.5)', textDecoration: 'none' }}
                         >
                             Login
                         </Link>
                         <Link
                             href="/user/signup"
                             onClick={() => setMobileOpen(false)}
-                            className="px-8 py-3 rounded-lg text-sm uppercase tracking-widest font-semibold text-white transition-all"
-                            style={{ background: 'var(--accent-copper)' }}
+                            className="px-8 py-3 transition-all"
+                            style={{
+                                background: 'linear-gradient(135deg, #C4956A, #a87a50)',
+                                color: '#fff', fontSize: '0.7rem', letterSpacing: '0.12em',
+                                textTransform: 'uppercase', fontWeight: 700, borderRadius: '50px',
+                                boxShadow: '0 2px 12px rgba(196,149,106,0.25)',
+                                textDecoration: 'none',
+                            }}
                         >
                             Sign Up
                         </Link>

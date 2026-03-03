@@ -947,3 +947,194 @@ textarea.input {
 .u-font-mono {
   font-family: monospace;
 }
+
+/* ============================================
+   RESPONSIVE DESIGN UTILITIES
+   Breakpoints: 1024px (tablet), 768px (small tablet), 640px (mobile)
+   ============================================ */
+
+/* Admin main area — reduce padding on smaller screens */
+.admin-main {
+  padding: 1.5rem;
+  max-width: 1280px;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .admin-main {
+    padding: 1rem 0.75rem;
+  }
+}
+
+/* Responsive grid: 4-col → 2-col on tablet → 1-col on mobile */
+.responsive-grid-4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 1024px) {
+  .responsive-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .responsive-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive grid: 3-col → 2-col → 1-col */
+.responsive-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .responsive-grid-3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 480px) {
+  .responsive-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive grid: 2-col → 1-col */
+.responsive-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .responsive-grid-2 {
+    grid-template-columns: 1fr;
+  }
+
+  .responsive-grid-2>* {
+    grid-column: span 1 !important;
+  }
+}
+
+/* Horizontal scroll container for tables/data rows */
+.overflow-scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Investment row — 5-col grid on desktop, stacks on mobile */
+.inv-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 1.5fr) minmax(110px, 1fr) minmax(90px, 0.8fr) auto auto;
+  align-items: center;
+  padding: 14px 20px;
+  cursor: pointer;
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .inv-row {
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 14px 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inv-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px 14px;
+  }
+}
+
+/* Investment expanded details grid */
+.inv-details-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 768px) {
+  .inv-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .inv-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Action buttons — wrap on mobile */
+.action-buttons-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* Flex row that wraps to column on mobile */
+.flex-row-mobile-col {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+@media (max-width: 640px) {
+  .flex-row-mobile-col {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+
+/* Hide on mobile, show on desktop */
+.hide-mobile {
+  display: block;
+}
+
+@media (max-width: 640px) {
+  .hide-mobile {
+    display: none;
+  }
+}
+
+/* Profit table responsive wrapper */
+.profit-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: 12px;
+}
+
+.profit-table-wrap table {
+  min-width: 400px;
+}
+
+/* User main area */
+.user-main {
+  padding: 1.5rem;
+}
+
+@media (max-width: 768px) {
+  .user-main {
+    padding: 1rem 0.75rem;
+  }
+}
+
+/* Stat cards — flex wrap on mobile */
+.stat-cards-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stat-cards-row>* {
+  flex: 1 1 200px;
+  min-width: 0;
+}

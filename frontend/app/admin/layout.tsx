@@ -197,7 +197,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                     <div className="admin-header-line" />
                 </header>
 
-                <main style={{ flex: 1, padding: '1.5rem', maxWidth: '1280px', width: '100%' }}>
+                <main className="admin-main" style={{ flex: 1 }}>
                     {children}
                 </main>
             </div>

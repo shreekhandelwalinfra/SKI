@@ -88,7 +88,7 @@ export default function InvestmentsPage() {
                     <div className="section-label" style={{ fontSize: '0.6rem' }}>Submit Property Investment</div>
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.75rem' }}>
                         {/* Row 1: Property Name + Plot Area */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="responsive-grid-2">
                             <div>
                                 {fieldLabel('Property Name')}
                                 <input value={form.propertyName} onChange={e => setForm(p => ({ ...p, propertyName: e.target.value }))} className="input" placeholder="e.g., Green Valley Residency" required />
@@ -100,7 +100,7 @@ export default function InvestmentsPage() {
                         </div>
 
                         {/* Row 2: Property Value + Investment Amount */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div className="responsive-grid-2">
                             <div>
                                 {fieldLabel('Total Property Value (₹)')}
                                 <input type="number" value={form.propertyValue} onChange={e => setForm(p => ({ ...p, propertyValue: e.target.value }))} className="input" placeholder="Total property value" min="1" required />
@@ -118,7 +118,7 @@ export default function InvestmentsPage() {
                         </div>
 
                         {/* Row 4: Installment Number + Final checkbox */}
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', alignItems: 'end' }}>
+                        <div className="responsive-grid-2" style={{ alignItems: 'end' }}>
                             <div>
                                 {fieldLabel('Installment No.')}
                                 <input

@@ -199,7 +199,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                     </div>
                 </header>
 
-                <div style={{ flex: 1, padding: '1.5rem', maxWidth: '1280px', width: '100%' }}>
+                <div className="user-main" style={{ flex: 1, maxWidth: '1280px', width: '100%' }}>
                     {children}
                 </div>
             </main>

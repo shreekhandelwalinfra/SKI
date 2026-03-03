@@ -36,7 +36,7 @@ export default function ProfitSummaryPage() {
             <h2 className="heading-serif" style={{ fontSize: '1.25rem', color: 'var(--text-heading)', marginBottom: '1.5rem' }}>Profit Summary</h2>
 
             {/* Summary */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
                 {[{ l: 'Self Reward', v: selfData?.user?.selfReward || 0, a: '#FBBF24' }, { l: 'Team Bonus', v: selfData?.user?.teamBonus || 0, a: '#34D399' }, { l: 'Direct Bonus', v: selfData?.user?.directBonus || 0, a: '#F472B6' }].map(s => (
                     <div key={s.l} className="card" style={{ borderRadius: '10px', padding: '1.25rem', textAlign: 'center', border: '1px solid var(--border-color)' }}>
                         <div className="text-tracked" style={{ fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>{s.l}</div>
@@ -46,7 +46,7 @@ export default function ProfitSummaryPage() {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '1.5rem' }}>
                 {[{ k: 'self', l: 'Self Reward' }, { k: 'team', l: 'Team Bonus' }, { k: 'direct', l: 'Direct Bonus' }].map(t => (
                     <button key={t.k} onClick={() => setTab(t.k as any)}
                         style={{ padding: '0.5rem 1rem', borderRadius: '4px', fontSize: '0.75rem', fontWeight: 500, letterSpacing: '0.05em', cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif', border: '1px solid', borderColor: tab === t.k ? 'var(--accent-copper)' : 'var(--border-color)', background: tab === t.k ? 'var(--accent-copper)' : 'transparent', color: tab === t.k ? '#fff' : 'var(--text-secondary)', transition: 'all 0.2s' }}>
@@ -105,7 +105,7 @@ export default function ProfitSummaryPage() {
                         )}
                     </div>
                 )}
-                <div className="card" style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
+                <div className="card profit-table-wrap" style={{ border: '1px solid var(--border-color)' }}>
                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', fontFamily: 'var(--font-inter), sans-serif' }}>
                         <thead><tr style={{ background: 'var(--bg-surface-alt)' }}>{['#', 'Rank', 'Amount', 'Date', 'Remark', 'Status'].map(h => <th key={h} className="text-tracked" style={thStyle}>{h}</th>)}</tr></thead>
                         <tbody>{(selfData?.profits || []).length === 0 ? <tr><td colSpan={6} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No records</td></tr> : (selfData?.profits || []).map((p: any, i: number) => {

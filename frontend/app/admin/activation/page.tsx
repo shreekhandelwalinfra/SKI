@@ -92,7 +92,7 @@ export default function ActivationPage() {
     return (
         <div style={{ position: 'relative' }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '1.5rem' }}>
                 <div>
                     <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C4956A', fontWeight: 600, marginBottom: '4px' }}>Administration</p>
                     <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#F5F0EB', margin: 0 }}>User Activation</h1>
@@ -112,7 +112,7 @@ export default function ActivationPage() {
             </div>
 
             {/* Filter Tabs */}
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '1.25rem', padding: '4px', background: '#15151E', borderRadius: '10px', border: '1px solid #22222E' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1.25rem', padding: '4px', background: '#15151E', borderRadius: '10px', border: '1px solid #22222E' }}>
                 {filterTabs.map(tab => (
                     <button
                         key={tab.key}
@@ -157,61 +157,66 @@ export default function ActivationPage() {
                                 }}
                             >
                                 {/* Main Row */}
-                                <div
-                                    onClick={() => setExpandedId(isExpanded ? null : user.id)}
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'minmax(180px, 2fr) minmax(100px, 1fr) minmax(100px, 1fr) auto auto',
-                                        alignItems: 'center', padding: '14px 20px', cursor: 'pointer', gap: '16px',
-                                    }}
-                                >
-                                    {/* User */}
-                                    <div>
-                                        <div style={{ fontWeight: 600, color: '#F5F0EB', fontSize: '0.85rem' }}>{user.name}</div>
-                                        <div style={{ color: '#C4956A', fontFamily: 'monospace', fontSize: '0.7rem', marginTop: '2px' }}>{user.uniqueId}</div>
-                                    </div>
+                                <div className="overflow-scroll-x">
+                                    <div
+                                        onClick={() => setExpandedId(isExpanded ? null : user.id)}
+                                        style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'minmax(180px, 2fr) minmax(100px, 1fr) minmax(100px, 1fr) auto auto',
+                                            alignItems: 'center', padding: '14px 20px', cursor: 'pointer', gap: '16px',
+                                            minWidth: '600px',
+                                        }}
+                                    >
+                                        {/* User */}
+                                        <div>
+                                            <div style={{ fontWeight: 600, color: '#F5F0EB', fontSize: '0.85rem' }}>{user.name}</div>
+                                            <div style={{ color: '#C4956A', fontFamily: 'monospace', fontSize: '0.7rem', marginTop: '2px' }}>{user.uniqueId}</div>
+                                        </div>
 
-                                    {/* Email */}
-                                    <div style={{ color: '#8A8A96', fontSize: '0.78rem' }}>{user.email}</div>
+                                        {/* Email */}
+                                        <div style={{ color: '#8A8A96', fontSize: '0.78rem' }}>{user.email}</div>
 
-                                    {/* Phone */}
-                                    <div style={{ color: '#C0B8AE', fontSize: '0.82rem' }}>{user.phone || '—'}</div>
+                                        {/* Phone */}
+                                        <div style={{ color: '#C0B8AE', fontSize: '0.82rem' }}>{user.phone || '—'}</div>
 
-                                    {/* Date */}
-                                    <div style={{ color: '#555', fontSize: '0.72rem' }}>{fmtDate(user.createdAt)}</div>
+                                        {/* Date */}
+                                        <div style={{ color: '#555', fontSize: '0.72rem' }}>{fmtDate(user.createdAt)}</div>
 
-                                    {/* Status */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ss.dot }} />
-                                        <span style={{ fontSize: '0.72rem', fontWeight: 600, color: ss.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{user.status}</span>
-                                        <span style={{ color: '#555', fontSize: '0.85rem', marginLeft: '4px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▾</span>
+                                        {/* Status */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ss.dot }} />
+                                            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: ss.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{user.status}</span>
+                                            <span style={{ color: '#555', fontSize: '0.85rem', marginLeft: '4px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▾</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
                                     <div style={{ borderTop: '1px solid #22222E', padding: '16px 20px', background: '#151520' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Referred By</div>
-                                                <div style={{ fontSize: '0.8rem', color: user.referredBy ? '#C4956A' : '#555' }}>
-                                                    {user.referredBy ? `${user.referredBy.name} (${user.referredBy.uniqueId})` : 'Direct signup'}
+                                        <div className="overflow-scroll-x">
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', minWidth: '400px' }}>
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Referred By</div>
+                                                    <div style={{ fontSize: '0.8rem', color: user.referredBy ? '#C4956A' : '#555' }}>
+                                                        {user.referredBy ? `${user.referredBy.name} (${user.referredBy.uniqueId})` : 'Direct signup'}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Team Lead</div>
-                                                <div style={{ fontSize: '0.8rem', color: user.teamLead ? '#60A5FA' : '#555' }}>
-                                                    {user.teamLead ? `${user.teamLead.name} (${user.teamLead.uniqueId})` : 'None'}
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Team Lead</div>
+                                                    <div style={{ fontSize: '0.8rem', color: user.teamLead ? '#60A5FA' : '#555' }}>
+                                                        {user.teamLead ? `${user.teamLead.name} (${user.teamLead.uniqueId})` : 'None'}
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Registered On</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{fmtDate(user.createdAt)}</div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Registered On</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{fmtDate(user.createdAt)}</div>
+                                                </div>
                                             </div>
                                         </div>
 
                                         {/* Action Buttons */}
-                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                             {user.status === 'PENDING' && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setConfirmModal({ id: user.id, action: 'activate', name: user.name }); }}

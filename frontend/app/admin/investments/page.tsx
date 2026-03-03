@@ -86,7 +86,7 @@ export default function InvestmentsPage() {
     return (
         <div style={{ position: 'relative' }}>
             {/* Header */}
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '1.5rem' }}>
                 <div>
                     <p style={{ fontSize: '0.65rem', textTransform: 'uppercase', letterSpacing: '0.12em', color: '#C4956A', fontWeight: 600, marginBottom: '4px' }}>Administration</p>
                     <h1 style={{ fontSize: '1.4rem', fontWeight: 700, color: '#F5F0EB', margin: 0 }}>Investment Requests</h1>
@@ -98,7 +98,7 @@ export default function InvestmentsPage() {
             </div>
 
             {/* Filter Tabs */}
-            <div style={{ display: 'flex', gap: '6px', marginBottom: '1.25rem', padding: '4px', background: '#15151E', borderRadius: '10px', border: '1px solid #22222E' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '1.25rem', padding: '4px', background: '#15151E', borderRadius: '10px', border: '1px solid #22222E' }}>
                 {filterTabs.map(tab => (
                     <button
                         key={tab.key}
@@ -151,78 +151,83 @@ export default function InvestmentsPage() {
                                 }}
                             >
                                 {/* Main Row — Click to Expand */}
-                                <div
-                                    onClick={() => setExpandedId(isExpanded ? null : inv.id)}
-                                    style={{
-                                        display: 'grid',
-                                        gridTemplateColumns: 'minmax(160px, 1.5fr) minmax(130px, 1fr) minmax(100px, 0.8fr) auto auto',
-                                        alignItems: 'center',
-                                        padding: '14px 20px',
-                                        cursor: 'pointer',
-                                        gap: '16px',
-                                    }}
-                                >
-                                    {/* Investor */}
-                                    <div>
-                                        <div style={{ fontWeight: 600, color: '#F5F0EB', fontSize: '0.85rem' }}>{inv.user?.name || inv.name}</div>
-                                        <div style={{ color: '#C4956A', fontFamily: 'monospace', fontSize: '0.7rem', marginTop: '2px' }}>{inv.user?.uniqueId || inv.uniqueId}</div>
-                                    </div>
+                                <div className="overflow-scroll-x">
+                                    <div
+                                        onClick={() => setExpandedId(isExpanded ? null : inv.id)}
+                                        style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: 'minmax(160px, 1.5fr) minmax(130px, 1fr) minmax(100px, 0.8fr) auto auto',
+                                            alignItems: 'center',
+                                            padding: '14px 20px',
+                                            cursor: 'pointer',
+                                            gap: '16px',
+                                            minWidth: '600px',
+                                        }}
+                                    >
+                                        {/* Investor */}
+                                        <div>
+                                            <div style={{ fontWeight: 600, color: '#F5F0EB', fontSize: '0.85rem' }}>{inv.user?.name || inv.name}</div>
+                                            <div style={{ color: '#C4956A', fontFamily: 'monospace', fontSize: '0.7rem', marginTop: '2px' }}>{inv.user?.uniqueId || inv.uniqueId}</div>
+                                        </div>
 
-                                    {/* Property */}
-                                    <div>
-                                        <div style={{ color: '#C0B8AE', fontSize: '0.82rem', fontWeight: 500 }}>{inv.propertyName || '—'}</div>
-                                        <div style={{ color: '#555', fontSize: '0.68rem', marginTop: '2px' }}>{inv.plotAreaSize || ''}</div>
-                                    </div>
+                                        {/* Property */}
+                                        <div>
+                                            <div style={{ color: '#C0B8AE', fontSize: '0.82rem', fontWeight: 500 }}>{inv.propertyName || '—'}</div>
+                                            <div style={{ color: '#555', fontSize: '0.68rem', marginTop: '2px' }}>{inv.plotAreaSize || ''}</div>
+                                        </div>
 
-                                    {/* Amount */}
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontWeight: 700, color: '#F5F0EB', fontSize: '0.9rem' }}>{fmt(inv.amount)}</div>
-                                        {inv.propertyValue > 0 && <div style={{ color: '#555', fontSize: '0.65rem', marginTop: '2px' }}>of {fmt(inv.propertyValue)}</div>}
-                                    </div>
+                                        {/* Amount */}
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontWeight: 700, color: '#F5F0EB', fontSize: '0.9rem' }}>{fmt(inv.amount)}</div>
+                                            {inv.propertyValue > 0 && <div style={{ color: '#555', fontSize: '0.65rem', marginTop: '2px' }}>of {fmt(inv.propertyValue)}</div>}
+                                        </div>
 
-                                    {/* Installment */}
-                                    <div>
-                                        <span style={{
-                                            padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: 600,
-                                            background: inv.installmentNo === 'Final' ? 'rgba(34,197,94,0.12)' : 'rgba(196,149,106,0.12)',
-                                            color: inv.installmentNo === 'Final' ? '#22c55e' : '#C4956A',
-                                        }}>
-                                            {inv.installmentNo === 'Final' ? '✓ Final' : `#${inv.installmentNo || '1'}`}
-                                        </span>
-                                    </div>
+                                        {/* Installment */}
+                                        <div>
+                                            <span style={{
+                                                padding: '3px 10px', borderRadius: '20px', fontSize: '0.68rem', fontWeight: 600,
+                                                background: inv.installmentNo === 'Final' ? 'rgba(34,197,94,0.12)' : 'rgba(196,149,106,0.12)',
+                                                color: inv.installmentNo === 'Final' ? '#22c55e' : '#C4956A',
+                                            }}>
+                                                {inv.installmentNo === 'Final' ? '✓ Final' : `#${inv.installmentNo || '1'}`}
+                                            </span>
+                                        </div>
 
-                                    {/* Status */}
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                        <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ss.dot }} />
-                                        <span style={{ fontSize: '0.72rem', fontWeight: 600, color: ss.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{inv.status}</span>
-                                        <span style={{ color: '#555', fontSize: '0.85rem', marginLeft: '4px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▾</span>
+                                        {/* Status */}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                            <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: ss.dot }} />
+                                            <span style={{ fontSize: '0.72rem', fontWeight: 600, color: ss.text, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{inv.status}</span>
+                                            <span style={{ color: '#555', fontSize: '0.85rem', marginLeft: '4px', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)', transition: 'transform 0.2s' }}>▾</span>
+                                        </div>
                                     </div>
                                 </div>
 
                                 {/* Expanded Details + Actions */}
                                 {isExpanded && (
                                     <div style={{ borderTop: '1px solid #22222E', padding: '16px 20px', background: '#151520' }}>
-                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '16px' }}>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Address</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{inv.propertyAddress || '—'}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Date</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{fmtDate(inv.transactionDate)}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Transaction ID</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#C4956A', fontFamily: 'monospace' }}>{inv.transactionId}</div>
-                                            </div>
-                                            <div>
-                                                <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Remarks</div>
-                                                <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{inv.remarks || '—'}</div>
+                                        <div className="overflow-scroll-x">
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', gap: '16px', marginBottom: '16px', minWidth: '500px' }}>
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Address</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{inv.propertyAddress || '—'}</div>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Date</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{fmtDate(inv.transactionDate)}</div>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Transaction ID</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#C4956A', fontFamily: 'monospace' }}>{inv.transactionId}</div>
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Remarks</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{inv.remarks || '—'}</div>
+                                                </div>
                                             </div>
                                         </div>
 
                                         {/* Action Buttons */}
-                                        <div style={{ display: 'flex', gap: '10px' }}>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                                             {inv.status !== 'APPROVED' && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setConfirmModal({ id: inv.id, status: 'APPROVED', name: inv.user?.name || inv.name }); }}

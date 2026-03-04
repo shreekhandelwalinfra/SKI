@@ -364,8 +364,7 @@ img {
 }
 
 /* Prevent iOS bounce-scroll when menu is open */
-html:has(body[style*="position: fixed"]) {
-  overflow: hidden;
+html[style*="overflow: hidden"] {
   height: 100%;
 }
 

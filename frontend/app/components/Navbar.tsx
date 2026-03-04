@@ -347,8 +347,8 @@ export default function Navbar() {
             {/* Mobile Menu */}
             {mobileOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 top-0 z-40 animate-fadeIn"
-                    style={{ background: 'var(--bg-primary)' }}
+                    className="lg:hidden fixed inset-0 top-0 z-[60] animate-fadeIn"
+                    style={{ background: '#0a0a12' }}
                 >
                     <div className="flex justify-end p-6">
                         <button onClick={() => setMobileOpen(false)} aria-label="Close menu">

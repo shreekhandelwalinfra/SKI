@@ -4,7 +4,7 @@ import Link from 'next/link';
 
 export default function Hero() {
     return (
-        <section className="relative min-h-[100vh] flex items-center justify-center overflow-hidden">
+        <section className="relative flex items-center justify-center overflow-hidden" style={{ minHeight: '100vh' }}>
             {/* Background Image */}
             <div className="absolute inset-0 z-0">
                 <img
@@ -16,7 +16,7 @@ export default function Hero() {
                 {/* Dark gradient overlay */}
                 <div
                     className="absolute inset-0"
-                    style={{ background: 'linear-gradient(180deg, rgba(10,10,18,0.7) 0%, rgba(10,10,18,0.4) 40%, rgba(10,10,18,0.6) 70%, rgba(10,10,18,0.92) 100%)' }}
+                    style={{ background: 'linear-gradient(180deg, rgba(10,10,18,0.75) 0%, rgba(10,10,18,0.45) 40%, rgba(10,10,18,0.6) 70%, rgba(10,10,18,0.92) 100%)' }}
                 />
             </div>
 
@@ -27,108 +27,89 @@ export default function Hero() {
             />
 
             {/* Content — centered */}
-            <div className="relative z-10 text-center px-6 max-w-4xl mx-auto" style={{ paddingTop: '80px' }}>
-                {/* Badge */}
-                <div
-                    className="animate-fadeInUp"
-                    style={{ opacity: 0, animationDelay: '0.1s' }}
-                >
-                    <span
-                        style={{
-                            display: 'inline-block', padding: '6px 20px', borderRadius: '50px',
+            <div className="relative z-10 text-center w-full" style={{ padding: '120px 20px 60px' }}>
+                <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+                    {/* Badge */}
+                    <div className="animate-fadeInUp" style={{ opacity: 0, animationDelay: '0.1s', marginBottom: '20px' }}>
+                        <span style={{
+                            display: 'inline-block', padding: '5px 16px', borderRadius: '50px',
                             background: 'rgba(196,149,106,0.08)', border: '1px solid rgba(196,149,106,0.25)',
-                            fontSize: '0.62rem', letterSpacing: '0.2em', textTransform: 'uppercase',
+                            fontSize: '0.55rem', letterSpacing: '0.18em', textTransform: 'uppercase',
                             color: '#C4956A', fontWeight: 600, fontFamily: 'var(--font-inter), sans-serif',
-                            marginBottom: '28px',
-                        }}
-                    >
-                        Premium Real Estate Investments
-                    </span>
-                </div>
+                        }}>
+                            Premium Real Estate Investments
+                        </span>
+                    </div>
 
-                {/* Main Heading */}
-                <h1
-                    className="animate-fadeInUp"
-                    style={{
+                    {/* Main Heading */}
+                    <h1 className="animate-fadeInUp" style={{
                         fontFamily: 'var(--font-playfair), Georgia, serif',
-                        fontSize: 'clamp(2.5rem, 6vw, 4.5rem)',
+                        fontSize: 'clamp(2rem, 5.5vw, 4.5rem)',
                         fontWeight: 700, color: '#F5F0EB',
                         lineHeight: 1.08, letterSpacing: '0.02em',
-                        marginBottom: '20px',
+                        marginBottom: '16px',
                         opacity: 0, animationDelay: '0.25s',
-                    }}
-                >
-                    Shree Khandelwal<br />
-                    <span style={{ color: '#C4956A' }}>Infra</span>
-                </h1>
+                    }}>
+                        Shree Khandelwal<br />
+                        <span style={{ color: '#C4956A' }}>Infra</span>
+                    </h1>
 
-                {/* Subtitle */}
-                <p
-                    className="animate-fadeInUp"
-                    style={{
-                        fontSize: '1rem', color: 'rgba(245,240,235,0.55)', lineHeight: 1.8,
+                    {/* Subtitle */}
+                    <p className="animate-fadeInUp" style={{
+                        fontSize: 'clamp(0.82rem, 2.5vw, 1rem)', color: 'rgba(245,240,235,0.55)', lineHeight: 1.7,
                         fontFamily: 'var(--font-inter), sans-serif',
-                        maxWidth: '480px', margin: '0 auto 36px',
+                        maxWidth: '440px', margin: '0 auto',
+                        marginBottom: '28px',
                         opacity: 0, animationDelay: '0.4s',
-                    }}
-                >
-                    Your trusted gateway to verified land investments across
-                    Noida, Greater Noida, Jewar &amp; Mathura-Vrindavan.
-                </p>
+                    }}>
+                        Your trusted gateway to verified land investments across
+                        Noida, Greater Noida, Jewar &amp; Mathura-Vrindavan.
+                    </p>
 
-                {/* CTA Buttons */}
-                <div
-                    className="animate-fadeInUp flex items-center justify-center gap-4 flex-wrap"
-                    style={{ opacity: 0, animationDelay: '0.55s' }}
-                >
-                    <Link
-                        href="/properties"
-                        style={{
-                            display: 'inline-block', padding: '14px 36px', borderRadius: '50px',
+                    {/* CTA Buttons */}
+                    <div className="animate-fadeInUp" style={{
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        gap: '12px', flexWrap: 'wrap',
+                        opacity: 0, animationDelay: '0.55s',
+                    }}>
+                        <Link href="/properties" style={{
+                            display: 'inline-block', padding: '12px 28px', borderRadius: '50px',
                             background: 'linear-gradient(135deg, #C4956A, #a87a50)',
-                            color: '#fff', fontSize: '0.75rem', fontWeight: 700,
-                            letterSpacing: '0.15em', textTransform: 'uppercase',
-                            fontFamily: 'var(--font-inter), sans-serif',
-                            textDecoration: 'none',
+                            color: '#fff', fontSize: 'clamp(0.65rem, 1.8vw, 0.75rem)', fontWeight: 700,
+                            letterSpacing: '0.13em', textTransform: 'uppercase',
+                            fontFamily: 'var(--font-inter), sans-serif', textDecoration: 'none',
                             boxShadow: '0 4px 20px rgba(196,149,106,0.3)',
-                            transition: 'transform 0.2s, box-shadow 0.2s',
-                        }}
-                    >
-                        View Properties
-                    </Link>
-                    <Link
-                        href="/earning-plan"
-                        style={{
-                            display: 'inline-block', padding: '14px 36px', borderRadius: '50px',
+                        }}>
+                            View Properties
+                        </Link>
+                        <Link href="/earning-plan" style={{
+                            display: 'inline-block', padding: '12px 28px', borderRadius: '50px',
                             background: 'transparent', border: '1px solid rgba(245,240,235,0.15)',
-                            color: 'rgba(245,240,235,0.7)', fontSize: '0.75rem', fontWeight: 600,
-                            letterSpacing: '0.15em', textTransform: 'uppercase',
-                            fontFamily: 'var(--font-inter), sans-serif',
-                            textDecoration: 'none', transition: 'all 0.2s',
-                        }}
-                    >
-                        Earning Plan
-                    </Link>
-                </div>
+                            color: 'rgba(245,240,235,0.7)', fontSize: 'clamp(0.65rem, 1.8vw, 0.75rem)', fontWeight: 600,
+                            letterSpacing: '0.13em', textTransform: 'uppercase',
+                            fontFamily: 'var(--font-inter), sans-serif', textDecoration: 'none',
+                        }}>
+                            Earning Plan
+                        </Link>
+                    </div>
 
-                {/* Stats bar */}
-                <div
-                    className="animate-fadeInUp"
-                    style={{
-                        marginTop: '56px', display: 'flex', justifyContent: 'center', gap: '48px',
-                        opacity: 0, animationDelay: '0.7s', flexWrap: 'wrap',
-                    }}
-                >
-                    {[
-                        { val: '500+', label: 'Properties Delivered' },
-                        { val: '15+', label: 'Years Experience' },
-                        { val: '₹500Cr+', label: 'Business Volume' },
-                    ].map((s, i) => (
-                        <div key={i} style={{ textAlign: 'center' }}>
-                            <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#C4956A', fontFamily: 'var(--font-playfair)', marginBottom: '4px' }}>{s.val}</div>
-                            <div style={{ fontSize: '0.6rem', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'rgba(245,240,235,0.35)', fontFamily: 'var(--font-inter)' }}>{s.label}</div>
-                        </div>
-                    ))}
+                    {/* Stats bar */}
+                    <div className="animate-fadeInUp" style={{
+                        marginTop: '40px', display: 'flex', justifyContent: 'center',
+                        gap: 'clamp(20px, 5vw, 48px)', flexWrap: 'wrap',
+                        opacity: 0, animationDelay: '0.7s',
+                    }}>
+                        {[
+                            { val: '500+', label: 'Properties' },
+                            { val: '15+', label: 'Years' },
+                            { val: '₹500Cr+', label: 'Volume' },
+                        ].map((s, i) => (
+                            <div key={i} style={{ textAlign: 'center', minWidth: '70px' }}>
+                                <div style={{ fontSize: 'clamp(1.1rem, 3vw, 1.5rem)', fontWeight: 700, color: '#C4956A', fontFamily: 'var(--font-playfair)', marginBottom: '2px' }}>{s.val}</div>
+                                <div style={{ fontSize: '0.55rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(245,240,235,0.3)', fontFamily: 'var(--font-inter)' }}>{s.label}</div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
 

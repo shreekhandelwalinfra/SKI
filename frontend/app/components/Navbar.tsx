@@ -58,6 +58,7 @@ export default function Navbar() {
     const [user, setUser] = useState<{ name: string } | null>(null);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
+    const scrollPosRef = useRef(0);
 
     // Check auth state on mount and when storage changes
     useEffect(() => {
@@ -96,31 +97,33 @@ export default function Navbar() {
 
     useEffect(() => {
         if (mobileOpen) {
-            // Save current scroll position
-            const scrollY = window.scrollY;
+            // Save current scroll position in ref before locking
+            scrollPosRef.current = window.scrollY;
             document.body.style.position = 'fixed';
-            document.body.style.top = `-${scrollY}px`;
+            document.body.style.top = `-${scrollPosRef.current}px`;
             document.body.style.left = '0';
             document.body.style.right = '0';
             document.body.style.overflow = 'hidden';
-        } else {
-            // Restore scroll position
-            const scrollY = document.body.style.top;
+        } else if (scrollPosRef.current > 0) {
+            // Only restore if we actually saved a position
+            const savedPos = scrollPosRef.current;
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.left = '';
             document.body.style.right = '';
             document.body.style.overflow = '';
-            if (scrollY) {
-                window.scrollTo(0, parseInt(scrollY || '0') * -1);
-            }
+            window.scrollTo(0, savedPos);
         }
         return () => {
+            const savedPos = scrollPosRef.current;
             document.body.style.position = '';
             document.body.style.top = '';
             document.body.style.left = '';
             document.body.style.right = '';
             document.body.style.overflow = '';
+            if (savedPos > 0) {
+                window.scrollTo(0, savedPos);
+            }
         };
     }, [mobileOpen]);
 

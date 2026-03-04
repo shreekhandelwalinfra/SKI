@@ -22,6 +22,7 @@ export default function UserLoginPage() {
             const res = await userLogin(email, password);
             localStorage.setItem('user-token', res.data.token);
             localStorage.setItem('user-data', JSON.stringify(res.data));
+            window.dispatchEvent(new Event('ski-auth-change'));
             router.push('/user/dashboard');
         } catch (err: any) { setError(err.message); } finally { setLoading(false); }
     };

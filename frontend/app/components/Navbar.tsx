@@ -96,11 +96,32 @@ export default function Navbar() {
 
     useEffect(() => {
         if (mobileOpen) {
+            // Save current scroll position
+            const scrollY = window.scrollY;
+            document.body.style.position = 'fixed';
+            document.body.style.top = `-${scrollY}px`;
+            document.body.style.left = '0';
+            document.body.style.right = '0';
             document.body.style.overflow = 'hidden';
         } else {
+            // Restore scroll position
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
             document.body.style.overflow = '';
+            if (scrollY) {
+                window.scrollTo(0, parseInt(scrollY || '0') * -1);
+            }
         }
-        return () => { document.body.style.overflow = ''; };
+        return () => {
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.left = '';
+            document.body.style.right = '';
+            document.body.style.overflow = '';
+        };
     }, [mobileOpen]);
 
     // Close dropdown when clicking outside
@@ -347,8 +368,21 @@ export default function Navbar() {
             {/* Mobile Menu */}
             {mobileOpen && (
                 <div
-                    className="lg:hidden fixed inset-0 top-0 z-[60] animate-fadeIn"
-                    style={{ background: '#0a0a12' }}
+                    className="lg:hidden fixed z-[60] animate-fadeIn"
+                    style={{
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        width: '100vw',
+                        height: '100dvh',
+                        minHeight: '-webkit-fill-available',
+                        background: '#0a0a12',
+                        overflow: 'hidden',
+                        touchAction: 'none',
+                        WebkitOverflowScrolling: 'touch',
+                    }}
+                    onTouchMove={(e) => e.preventDefault()}
                 >
                     <div className="flex justify-end p-6">
                         <button onClick={() => setMobileOpen(false)} aria-label="Close menu">

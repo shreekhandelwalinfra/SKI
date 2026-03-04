@@ -354,6 +354,21 @@ img {
   width: 100%;
 }
 
+/* iOS mobile menu — full-screen coverage fix */
+@supports (-webkit-touch-callout: none) {
+
+  /* iOS-only: use -webkit-fill-available as height fallback */
+  .fixed.z-\[60\] {
+    height: -webkit-fill-available !important;
+  }
+}
+
+/* Prevent iOS bounce-scroll when menu is open */
+html:has(body[style*="position: fixed"]) {
+  overflow: hidden;
+  height: 100%;
+}
+
 /* ============================================
    Animations
    ============================================ */

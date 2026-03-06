@@ -111,6 +111,16 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                             <div className="text-tracked" style={{ fontSize: '0.6rem', color: 'var(--accent-copper)' }}>My Account</div>
                         </div>
                     </Link>
+
+                    {/* Back to Home Breadcrumb */}
+                    <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)' }}>
+                        <Link href="/"
+                            style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.75rem', textDecoration: 'none', transition: 'color 0.2s ease', fontWeight: 500 }}
+                        >
+                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                            Back to Website
+                        </Link>
+                    </div>
                 </div>
 
                 {/* Navigation */}
@@ -161,6 +171,12 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                         )}
                         {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                     </button>
+                    {/* Back to Home explicit link
+                    <Link href="/"
+                        style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.7rem 0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--text-secondary)', fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.82rem', transition: 'all 0.2s ease', textDecoration: 'none', marginBottom: '4px' }}>
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
+                        Back to Website
+                    </Link> */}
 
                     <button onClick={handleLogout}
                         style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', width: '100%', padding: '0.7rem 0.75rem', borderRadius: '8px', border: 'none', cursor: 'pointer', background: 'transparent', color: '#ef4444', fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.82rem', transition: 'all 0.2s ease' }}>

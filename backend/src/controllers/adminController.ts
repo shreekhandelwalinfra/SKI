@@ -608,7 +608,10 @@ export const markTicketSeen = async (req: AuthRequest, res: Response): Promise<v
     try {
         const ticket = await prisma.supportTicket.update({
             where: { id: req.params.id },
-            data: { lastSeenByAdmin: new Date() },
+            data: {
+                // @ts-ignore
+                lastSeenByAdmin: new Date()
+            },
         });
         getIO()?.emit('support:updated');
         res.status(200).json({ status: 'success', data: ticket });

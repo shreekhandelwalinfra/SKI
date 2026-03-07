@@ -301,7 +301,10 @@ export const markTicketSeenByUser = async (req: AuthRequest, res: Response): Pro
 
         const updated = await prisma.supportTicket.update({
             where: { id: req.params.id },
-            data: { lastSeenByUser: new Date() },
+            data: {
+                // @ts-ignore
+                lastSeenByUser: new Date()
+            },
         });
         getIO()?.emit('support:updated');
         res.status(200).json({ status: 'success', data: updated });

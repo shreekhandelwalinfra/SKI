@@ -24,7 +24,7 @@ interface UserItem {
 const TreeNode = ({ n, level = 0, onEdit, onBlock, onDelete }: { n: any, level?: number, onEdit: (u: any) => void, onBlock: (id: string) => void, onDelete: (id: string) => void }) => {
     const [expanded, setExpanded] = useState(true);
     const hasChildren = n.children && n.children.length > 0;
-    const fmtTree = (v: number) => v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${(v || 0).toLocaleString('en-IN')}`;
+    const fmtTree = (v: number) => v >= 10000000 ? `₹${(v / 10000000).toFixed(1)} CR` : v >= 100000 ? `₹${(v / 100000).toFixed(1)}L` : `₹${(v || 0).toLocaleString('en-IN')}`;
     const isActive = n.status === 'active' || n.status === 'ACTIVE';
 
     return (
@@ -298,7 +298,7 @@ export default function UsersPage() {
         );
     };
 
-    const fmt = (n: number) => n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : `₹${n.toLocaleString('en-IN')}`;
+    const fmt = (n: number) => n >= 10000000 ? `₹${(n / 10000000).toFixed(1)} CR` : n >= 100000 ? `₹${(n / 100000).toFixed(1)}L` : `₹${n.toLocaleString('en-IN')}`;
     const statusColor = (s: string) => {
         const sl = s?.toLowerCase();
         if (sl === 'active') return { bg: 'rgba(34,197,94,0.12)', text: '#4ade80', border: 'rgba(34,197,94,0.25)', bar: '#22c55e' };
@@ -446,7 +446,7 @@ export default function UsersPage() {
                                             <div style={{ color: '#6ee7b7', fontWeight: 600, fontSize: '0.9rem', fontFamily: 'var(--font-inter), sans-serif' }}>{fmt(user.selfInvestment || 0)}</div>
                                         </div>
                                         <div style={{ background: 'rgba(26,42,74,0.35)', padding: '0.65rem 0.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.03)' }}>
-                                            <div style={{ fontSize: '0.55rem', color: '#8A8A96', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '3px', fontFamily: 'var(--font-inter), sans-serif' }}>Volume</div>
+                                            <div style={{ fontSize: '0.55rem', color: '#8A8A96', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '3px', fontFamily: 'var(--font-inter), sans-serif' }}>Team Business</div>
                                             <div style={{ color: '#93c5fd', fontWeight: 600, fontSize: '0.9rem', fontFamily: 'var(--font-inter), sans-serif' }}>{fmt(user.totalBusiness)}</div>
                                         </div>
                                         <div style={{ background: 'rgba(26,42,74,0.35)', padding: '0.65rem 0.75rem', borderRadius: '10px', border: '1px solid rgba(255,255,255,0.03)' }}>

@@ -32,7 +32,7 @@ const mockTickets = [
     { id: 's2', subject: 'Referral Bonus Not Credited', message: 'I referred Priya but bonus not showing', status: 'IN_PROGRESS', adminReply: 'We are looking into this', messages: [{ sender: 'user', text: 'I referred Priya but bonus not showing', time: '2026-02-18T10:00:00Z' }, { sender: 'admin', text: 'We are looking into this. Will be resolved within 24 hours.', time: '2026-02-19T10:00:00Z' }], createdAt: '2026-02-18T10:00:00Z' },
 ];
 
-const mockRankConfig = { rank: 3, teamBusinessMin: 2500000, teamBusinessMax: 5000000, commissionPct: 9, selfInvestment: 1000000, rewardName: 'Motorbike', rewardValue: 50000 };
+const mockRankConfig = { rank: 3, teamBusinessMin: 2500000, teamBusinessMax: 5000000, commissionPct: 7, selfInvestment: 1000000, rewardName: 'Motorbike', rewardValue: 50000 };
 
 const mockSelfRewardProfits = [
     { id: 'p1', type: 'SELF_REWARD', amount: 25000, remark: 'Rank 2 achievement', status: 'PAID', transactionId: 'SR-001', createdAt: '2026-01-25T10:00:00Z' },
@@ -46,7 +46,7 @@ const mockTeamBonusProfits = [
 ];
 
 const mockDirectBonusProfits = [
-    { id: 'p6', type: 'DIRECT_BONUS', amount: 15000, investmentAmount: 300000, brokerage: 5, commission: 15000, remark: 'Direct referral commission', status: 'PAID', transactionId: 'DB-001', createdAt: '2026-01-22T10:00:00Z' },
+    { id: 'p6', type: 'DIRECT_BONUS', amount: 9000, investmentAmount: 300000, brokerage: 3, commission: 9000, remark: 'Direct referral commission', status: 'PAID', transactionId: 'DB-001', createdAt: '2026-01-22T10:00:00Z' },
     { id: 'p7', type: 'DIRECT_BONUS', amount: 7000, investmentAmount: 200000, brokerage: 3.5, commission: 7000, remark: 'Amit Kumar investment', status: 'APPROVED', transactionId: 'DB-002', createdAt: '2026-02-05T10:00:00Z' },
 ];
 

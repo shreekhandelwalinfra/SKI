@@ -107,7 +107,7 @@ model RankConfig {
   rank            Int     @unique
   teamBusinessMin Float              // Lower boundary (exclusive for rank>1)
   teamBusinessMax Float              // Upper boundary (inclusive, <= check)
-  commissionPct   Float              // Rate as percentage (5, 7, 9, etc.)
+  commissionPct   Float              // Rate as percentage (3, 5, 7, 9, etc.)
   selfInvestment  Float              // Required self-investment to qualify
   rewardName      String             // Physical reward name
   rewardValue     Float              // Physical reward value in INR

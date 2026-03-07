@@ -260,7 +260,7 @@ export async function processInstallment(
  * Rules:
  *   - Track maxRatePaidSoFar (starts at triggering user's rate)
  *   - "Same Rank Trap": if upline rate == triggering rate, skip
- *   - Stop at 18% or 10 levels max
+ *   - Stop at 17% or 10 levels max
  */
 async function distributeTeamBonus(
     triggeringUserId: string,
@@ -285,7 +285,7 @@ async function distributeTeamBonus(
     let currentUplineId: string | null = triggeringUser.referredById;
     let levelsTraversed = 0;
     const MAX_LEVELS = 10;
-    const MAX_RATE = 0.18; // 18%
+    const MAX_RATE = 0.17; // 17%
 
     while (currentUplineId && levelsTraversed < MAX_LEVELS && maxRatePaidSoFar < MAX_RATE) {
         levelsTraversed++;

@@ -9,16 +9,16 @@ export const metadata: Metadata = {
 };
 
 const ranks = [
-    { rank: 1, teamBusiness: '0 – 5 Lakh', commission: '5%', selfInvestment: '₹5 Lakh', reward: 'Mobile', rewardValue: '₹5,000' },
-    { rank: 2, teamBusiness: '5 – 25 Lakh', commission: '7%', selfInvestment: '₹7.5 Lakh', reward: 'LED TV', rewardValue: '₹20,000' },
-    { rank: 3, teamBusiness: '25 – 50 Lakh', commission: '9%', selfInvestment: '₹10 Lakh', reward: 'Motorbike', rewardValue: '₹50,000' },
-    { rank: 4, teamBusiness: '50 Lakh – 1 Cr', commission: '11%', selfInvestment: '₹25 Lakh', reward: 'Car', rewardValue: '₹3,00,000' },
-    { rank: 5, teamBusiness: '1 – 5 Cr', commission: '13%', selfInvestment: '₹35 Lakh', reward: 'Swift Car', rewardValue: '₹5,00,000' },
-    { rank: 6, teamBusiness: '5 – 10 Cr', commission: '14%', selfInvestment: '₹50 Lakh', reward: 'Scorpio', rewardValue: '₹10,00,000' },
-    { rank: 7, teamBusiness: '10 – 25 Cr', commission: '15%', selfInvestment: '₹1 Cr', reward: 'Fortuner', rewardValue: '₹25,00,000' },
-    { rank: 8, teamBusiness: '25 – 50 Cr', commission: '16%', selfInvestment: '₹2.5 Cr', reward: 'BMW', rewardValue: '₹50,00,000' },
-    { rank: 9, teamBusiness: '50 – 75 Cr', commission: '17%', selfInvestment: '₹5 Cr', reward: 'Apartment', rewardValue: '₹75 Lakh' },
-    { rank: 10, teamBusiness: '75 – 100 Cr', commission: '18%', selfInvestment: '₹10 Cr', reward: 'Villa', rewardValue: '₹1 Cr' },
+    { rank: 1, teamBusiness: '0 – 5 Lakh', commission: '3%', selfInvestment: '₹5 Lakh', reward: 'Mobile', rewardValue: '₹5,000' },
+    { rank: 2, teamBusiness: '5 – 25 Lakh', commission: '5%', selfInvestment: '₹7.5 Lakh', reward: 'LED TV', rewardValue: '₹20,000' },
+    { rank: 3, teamBusiness: '25 – 50 Lakh', commission: '7%', selfInvestment: '₹10 Lakh', reward: 'Motorbike', rewardValue: '₹50,000' },
+    { rank: 4, teamBusiness: '50 Lakh – 1 Cr', commission: '9%', selfInvestment: '₹25 Lakh', reward: 'Car', rewardValue: '₹3,00,000' },
+    { rank: 5, teamBusiness: '1 – 5 Cr', commission: '11%', selfInvestment: '₹35 Lakh', reward: 'Swift Car', rewardValue: '₹5,00,000' },
+    { rank: 6, teamBusiness: '5 – 10 Cr', commission: '13%', selfInvestment: '₹50 Lakh', reward: 'Scorpio', rewardValue: '₹10,00,000' },
+    { rank: 7, teamBusiness: '10 – 25 Cr', commission: '14%', selfInvestment: '₹1 Cr', reward: 'Fortuner', rewardValue: '₹25,00,000' },
+    { rank: 8, teamBusiness: '25 – 50 Cr', commission: '15%', selfInvestment: '₹2.5 Cr', reward: 'BMW', rewardValue: '₹50,00,000' },
+    { rank: 9, teamBusiness: '50 – 75 Cr', commission: '16%', selfInvestment: '₹5 Cr', reward: 'Apartment', rewardValue: '₹75 Lakh' },
+    { rank: 10, teamBusiness: '75 – 100 Cr', commission: '17%', selfInvestment: '₹10 Cr', reward: 'Villa', rewardValue: '₹1 Cr' },
 ];
 
 export default function EarningPlanPage() {
@@ -207,13 +207,13 @@ export default function EarningPlanPage() {
                             {[
                                 {
                                     icon: '💵', title: 'Direct Bonus', subtitle: 'On personal referrals', color: '#34D399',
-                                    desc: 'When someone you personally referred invests, you receive a 5% direct commission on their investment amount.',
-                                    example: 'Referral invests ₹10 Lakh → You earn ₹50,000',
+                                    desc: 'When someone you personally referred invests, you receive a direct commission on their investment amount based on your rank (starting at 3%).',
+                                    example: 'Referral invests ₹10 Lakh → You earn ₹30,000 (at 3%)',
                                 },
                                 {
                                     icon: '👥', title: 'Team Bonus', subtitle: 'Level difference income', color: '#60A5FA',
                                     desc: 'You earn the difference between your rank commission % and your downline\'s rank %, applied to their investment. This works across your entire network.',
-                                    example: 'You: Rank 5 (13%) · Downline: Rank 2 (7%) → 6% of their investment',
+                                    example: 'You: Rank 5 (11%) · Downline: Rank 2 (5%) → 6% of their investment',
                                 },
                                 {
                                     icon: '🏆', title: 'Self Reward', subtitle: 'Rank achievement bonus', color: '#FBBF24',

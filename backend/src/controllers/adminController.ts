@@ -543,7 +543,9 @@ export const getUserIncome = async (req: AuthRequest, res: Response): Promise<vo
 // ─── SUPPORT ─────────────────────────────────────────────
 
 // Map frontend status strings to DB enum values
-function mapTicketStatus(frontendStatus: string): string {
+// Map frontend status strings to DB enum values
+function mapTicketStatus(frontendStatus: string | undefined): string | undefined {
+    if (!frontendStatus || typeof frontendStatus !== 'string') return undefined;
     const statusMap: Record<string, string> = {
         'open': 'OPEN',
         'in_progress': 'IN_PROGRESS',

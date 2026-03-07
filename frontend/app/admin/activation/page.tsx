@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client';
+import { useState, useEffect } from 'react';
 import { getUsers, activateUser, blockUser, addUser } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 interface UserItem {
     id: string;
@@ -18,8 +19,6 @@ interface UserItem {
 }
 
 export default function ActivationPage() {
-    const [users, setUsers] = useState<UserItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('pending');
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [confirmModal, setConfirmModal] = useState<{ id: string; action: string; name: string } | null>(null);
@@ -27,25 +26,23 @@ export default function ActivationPage() {
     const [showAddModal, setShowAddModal] = useState(false);
     const [formData, setFormData] = useState({ name: '', email: '', phone: '', password: '' });
     const [formError, setFormError] = useState('');
+    const { socket } = useSocket();
 
-    const loadUsers = useCallback(async () => {
-        try {
-            const res = await getUsers(`status=${statusFilter}`);
-            setUsers(res.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    }, [statusFilter]);
+    const fetchUsers = async () => {
+        const res = await getUsers(`status=${statusFilter}`);
+        return res.data;
+    };
 
-    useEffect(() => { loadUsers(); }, [loadUsers]);
+    const { data: usersData, isLoading: loading, mutate: loadUsers } = useSWR(
+        ['admin_activation', statusFilter],
+        fetchUsers
+    );
+    const users: UserItem[] = usersData || [];
 
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
         socket.on('investment:updated', loadUsers);
-        return () => { socket.disconnect(); };
-    }, [loadUsers]);
+        return () => { socket.off('investment:updated', loadUsers); };
+    }, [socket, loadUsers]);
 
     const handleConfirm = async () => {
         if (!confirmModal) return;
@@ -116,7 +113,7 @@ export default function ActivationPage() {
                 {filterTabs.map(tab => (
                     <button
                         key={tab.key}
-                        onClick={() => { setStatusFilter(tab.key); setLoading(true); }}
+                        onClick={() => { setStatusFilter(tab.key); }}
                         style={{
                             flex: 1, padding: '8px 16px', borderRadius: '8px', fontSize: '0.75rem', fontWeight: 500,
                             border: 'none', cursor: 'pointer', transition: 'all 0.2s',

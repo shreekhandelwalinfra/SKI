@@ -1,26 +1,30 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { getUserProfile, updateUserProfile, changeUserPassword, updateBankDetails } from '../lib/api';
+import useSWR from 'swr';
 
 export default function ProfilePage() {
-    const [profile, setProfile] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [tab, setTab] = useState<'personal' | 'bank' | 'password'>('personal');
     const [saving, setSaving] = useState(false);
     const [msg, setMsg] = useState({ type: '', text: '' });
     const [personal, setPersonal] = useState({ name: '', phone: '', address: '', city: '', state: '', pincode: '', panNumber: '', aadharNumber: '', dateOfBirth: '' });
     const [bank, setBank] = useState({ accountHolder: '', accountNumber: '', ifscCode: '', bankName: '', branchName: '', upiId: '' });
     const [pwd, setPwd] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
+    const [initialized, setInitialized] = useState(false);
 
-    useEffect(() => {
-        getUserProfile().then(res => {
-            const d = res.data; setProfile(d);
+    const fetchProfile = async () => {
+        const res = await getUserProfile();
+        const d = res.data;
+        if (!initialized) {
             setPersonal({ name: d.name || '', phone: d.phone || '', address: d.address || '', city: d.city || '', state: d.state || '', pincode: d.pincode || '', panNumber: d.panNumber || '', aadharNumber: d.aadharNumber || '', dateOfBirth: d.dateOfBirth || '' });
             if (d.bankDetail) setBank({ accountHolder: d.bankDetail.accountHolder || '', accountNumber: d.bankDetail.accountNumber || '', ifscCode: d.bankDetail.ifscCode || '', bankName: d.bankDetail.bankName || '', branchName: d.bankDetail.branchName || '', upiId: d.bankDetail.upiId || '' });
-            setLoading(false);
-        }).catch(() => setLoading(false));
-    }, []);
+            setInitialized(true);
+        }
+        return d;
+    };
+
+    const { data: profile, isLoading: loading } = useSWR('user_profile', fetchProfile);
 
     const showMsg = (t: string, text: string) => { setMsg({ type: t, text }); setTimeout(() => setMsg({ type: '', text: '' }), 3000); };
     const handlePersonal = async (e: React.FormEvent) => { e.preventDefault(); setSaving(true); try { await updateUserProfile(personal); showMsg('success', 'Profile updated successfully!'); } catch (err: any) { showMsg('error', err.message); } finally { setSaving(false); } };

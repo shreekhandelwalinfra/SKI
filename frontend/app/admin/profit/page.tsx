@@ -1,46 +1,42 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
 import { getFirmProfit, getTeamBonus, getUserIncome } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 type Tab = 'firm' | 'teamBonus' | 'userIncome';
 
 export default function ProfitPage() {
     const [tab, setTab] = useState<Tab>('firm');
-    const [firmProfits, setFirmProfits] = useState<any[]>([]);
-    const [teamBonusData, setTeamBonusData] = useState<any[]>([]);
-    const [userIncomeData, setUserIncomeData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [expandedTeams, setExpandedTeams] = useState<Record<string, boolean>>({});
+    const { socket } = useSocket();
 
-    const loadData = async () => {
-        setLoading(true);
-        try {
-            if (tab === 'firm') {
-                const res = await getFirmProfit();
-                setFirmProfits(res.data);
-            } else if (tab === 'teamBonus') {
-                const res = await getTeamBonus();
-                setTeamBonusData(res.data);
-            } else {
-                const res = await getUserIncome();
-                setUserIncomeData(res.data);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
+    const fetchProfitData = async () => {
+        if (tab === 'firm') {
+            const res = await getFirmProfit();
+            return { firm: res.data, teamBonus: [], userIncome: [] };
+        } else if (tab === 'teamBonus') {
+            const res = await getTeamBonus();
+            return { firm: [], teamBonus: res.data, userIncome: [] };
+        } else {
+            const res = await getUserIncome();
+            return { firm: [], teamBonus: [], userIncome: res.data };
         }
     };
 
-    useEffect(() => { loadData(); }, [tab]);
+    const { data, isLoading: loading, mutate: loadData } = useSWR(
+        ['admin_profit', tab],
+        fetchProfitData
+    );
+    const firmProfits = data?.firm || [];
+    const teamBonusData = data?.teamBonus || [];
+    const userIncomeData = data?.userIncome || [];
 
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
         socket.on('investment:updated', loadData);
-        return () => { socket.disconnect(); };
-    }, [tab]);
+        return () => { socket.off('investment:updated', loadData); };
+    }, [socket, loadData]);
 
     const toggleTeam = (id: string) => {
         setExpandedTeams(prev => ({ ...prev, [id]: !prev[id] }));
@@ -122,7 +118,7 @@ export default function ProfitPage() {
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            {firmProfits.map((p, i) => (
+                                            {firmProfits.map((p: any, i: number) => (
                                                 <tr key={p.id}>
                                                     <td style={{ color: '#7A7A8A', fontSize: '0.75rem' }}>{i + 1}</td>
                                                     <td style={{ color: '#F5F0EB', fontWeight: 500 }}>{p.user?.name || '—'}</td>
@@ -144,7 +140,7 @@ export default function ProfitPage() {
                     {tab === 'teamBonus' && (
                         teamBonusData.length === 0 ? emptyState('No team bonus records yet.') : (
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-                                {teamBonusData.map(group => (
+                                {teamBonusData.map((group: any) => (
                                     <div key={group.teamLead.id} className="glass-card" style={{ overflow: 'hidden' }}>
                                         <button
                                             onClick={() => toggleTeam(group.teamLead.id)}

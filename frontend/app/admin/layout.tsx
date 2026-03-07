@@ -6,6 +6,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '../components/ThemeProvider';
 import { SocketProvider } from '../../lib/SocketContext';
 import { SWRProvider } from '../../lib/SWRProvider';
+import { mutate } from 'swr';
 
 const sidebarItems = [
     {
@@ -59,6 +60,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const handleLogout = () => {
         localStorage.removeItem('admin-token');
         localStorage.removeItem('admin-user');
+        mutate(() => true, undefined, { revalidate: false }); // Wipe SWR cache
         router.push('/admin/login');
     };
 

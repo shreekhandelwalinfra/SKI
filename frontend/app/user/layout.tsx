@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTheme } from '../components/ThemeProvider';
 import { SocketProvider, useSocket } from '../../lib/SocketContext';
 import { SWRProvider } from '../../lib/SWRProvider';
+import { mutate } from 'swr';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -51,9 +52,9 @@ export default function UserLayout({ children }: { children: ReactNode }) {
         } catch { }
     }, []);
 
+    // Load cached data from localStorage + fetch auth/me ONCE on mount
     useEffect(() => {
         setMounted(true);
-        // Quick load from localStorage first
         try {
             const stored = localStorage.getItem('user-data');
             if (stored) {
@@ -63,12 +64,17 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                 setUserStatus(u.status || '');
             }
         } catch { }
+        // Fetch fresh user data once
+        refreshUserData();
+    }, [refreshUserData]);
+
+    // Route protection — redirect to login if no token (runs on navigation)
+    useEffect(() => {
         if (pathname !== '/user/login' && pathname !== '/user/signup') {
             const token = localStorage.getItem('user-token');
             if (!token) router.push('/user/login');
-            else refreshUserData(); // Then sync with real API data
         }
-    }, [pathname, router, refreshUserData]);
+    }, [pathname, router]);
 
     // No longer connecting local socket, just importing the logic conceptually for later refactor on individual pages, or grabbing global hook if needed.
     // However, the Layout itself doesn't need to listen to socket events natively here yet, we will just wrap the provider.
@@ -79,6 +85,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     const handleLogout = () => {
         localStorage.removeItem('user-token');
         localStorage.removeItem('user-data');
+        mutate(() => true, undefined, { revalidate: false }); // Wipe SWR cache
         router.push('/user/login');
     };
 

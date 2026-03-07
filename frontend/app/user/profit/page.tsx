@@ -1,26 +1,28 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import { getSelfReward, getTeamBonusProfit, getDirectBonusProfit } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 export default function ProfitSummaryPage() {
     const [tab, setTab] = useState<'self' | 'team' | 'direct'>('self');
-    const [selfData, setSelfData] = useState<any>(null);
-    const [teamData, setTeamData] = useState<any[]>([]);
-    const [directData, setDirectData] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
+    const { socket } = useSocket();
 
-    const loadAll = () => Promise.all([getSelfReward().then(r => setSelfData(r.data)), getTeamBonusProfit().then(r => setTeamData(r.data)), getDirectBonusProfit().then(r => setDirectData(r.data))]).finally(() => setLoading(false));
+    const fetchAll = async () => {
+        const [selfRes, teamRes, directRes] = await Promise.all([getSelfReward(), getTeamBonusProfit(), getDirectBonusProfit()]);
+        return { self: selfRes.data, team: teamRes.data, direct: directRes.data };
+    };
 
-    useEffect(() => { loadAll(); }, []);
+    const { data, isLoading: loading, mutate: loadAll } = useSWR('user_profit', fetchAll);
+    const selfData = data?.self || null;
+    const teamData = data?.team || [];
+    const directData = data?.direct || [];
 
-    // Real-time: refresh profits when investments change
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
         socket.on('investment:updated', loadAll);
-        return () => { socket.disconnect(); };
-    }, []);
+        return () => { socket.off('investment:updated', loadAll); };
+    }, [socket, loadAll]);
 
     const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     const fmt = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
@@ -131,7 +133,7 @@ export default function ProfitSummaryPage() {
             {tab === 'team' && (<div className="card" style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)' }}><div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', fontFamily: 'var(--font-inter), sans-serif' }}>
                     <thead><tr style={{ background: 'var(--bg-surface-alt)' }}>{['#', 'Teammate', 'ID', 'Rank', 'Diff %', 'Amount', 'TXN ID', 'Remark', 'Status'].map(h => <th key={h} className="text-tracked" style={{ ...thStyle, whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
-                    <tbody>{teamData.length === 0 ? <tr><td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No records</td></tr> : teamData.map((p, i) => { const sb = sBadge(p.status); return (<tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{i + 1}</td><td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>{p.fromUserName}</td><td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--accent-copper)' }}>{p.fromUserUniqueId}</td><td style={tdStyle}><span style={{ padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', background: 'rgba(124,58,237,0.1)', color: '#7C3AED' }}>R{p.fromUserRank}</span></td><td style={{ ...tdStyle, fontWeight: 600, color: '#60A5FA' }}>{p.differencePercentage}%</td><td style={{ ...tdStyle, fontWeight: 600, color: '#34D399' }}>{fmt(p.amount)}</td><td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.transactionId}</td><td style={{ ...tdStyle, color: 'var(--text-primary)' }}>{p.remark || '—'}</td><td style={tdStyle}><span style={{ padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 500, background: sb.bg, color: sb.c }}>{p.status}</span></td></tr>); })}</tbody>
+                    <tbody>{teamData.length === 0 ? <tr><td colSpan={9} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No records</td></tr> : teamData.map((p: any, i: number) => { const sb = sBadge(p.status); return (<tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{i + 1}</td><td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>{p.fromUserName}</td><td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--accent-copper)' }}>{p.fromUserUniqueId}</td><td style={tdStyle}><span style={{ padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', background: 'rgba(124,58,237,0.1)', color: '#7C3AED' }}>R{p.fromUserRank}</span></td><td style={{ ...tdStyle, fontWeight: 600, color: '#60A5FA' }}>{p.differencePercentage}%</td><td style={{ ...tdStyle, fontWeight: 600, color: '#34D399' }}>{fmt(p.amount)}</td><td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.transactionId}</td><td style={{ ...tdStyle, color: 'var(--text-primary)' }}>{p.remark || '—'}</td><td style={tdStyle}><span style={{ padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 500, background: sb.bg, color: sb.c }}>{p.status}</span></td></tr>); })}</tbody>
                 </table>
             </div></div>)}
 
@@ -139,7 +141,7 @@ export default function ProfitSummaryPage() {
             {tab === 'direct' && (<div className="card" style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)' }}><div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', fontFamily: 'var(--font-inter), sans-serif' }}>
                     <thead><tr style={{ background: 'var(--bg-surface-alt)' }}>{['#', 'Investment', 'Brokerage %', 'Commission', 'Date', 'Remark', 'Status'].map(h => <th key={h} className="text-tracked" style={{ ...thStyle, whiteSpace: 'nowrap' }}>{h}</th>)}</tr></thead>
-                    <tbody>{directData.length === 0 ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No records</td></tr> : directData.map((p, i) => { const sb = sBadge(p.status); return (<tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{i + 1}</td><td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>{fmt(p.investmentAmount)}</td><td style={{ ...tdStyle, color: '#60A5FA' }}>{p.brokerage}%</td><td style={{ ...tdStyle, fontWeight: 600, color: '#34D399' }}>{fmt(p.commission)}</td><td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{formatDate(p.createdAt)}</td><td style={{ ...tdStyle, color: 'var(--text-primary)' }}>{p.remark || '—'}</td><td style={tdStyle}><span style={{ padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 500, background: sb.bg, color: sb.c }}>{p.status}</span></td></tr>); })}</tbody>
+                    <tbody>{directData.length === 0 ? <tr><td colSpan={7} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No records</td></tr> : directData.map((p: any, i: number) => { const sb = sBadge(p.status); return (<tr key={p.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}><td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{i + 1}</td><td style={{ ...tdStyle, fontWeight: 600, color: 'var(--text-primary)' }}>{fmt(p.investmentAmount)}</td><td style={{ ...tdStyle, color: '#60A5FA' }}>{p.brokerage}%</td><td style={{ ...tdStyle, fontWeight: 600, color: '#34D399' }}>{fmt(p.commission)}</td><td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{formatDate(p.createdAt)}</td><td style={{ ...tdStyle, color: 'var(--text-primary)' }}>{p.remark || '—'}</td><td style={tdStyle}><span style={{ padding: '0.25rem 0.6rem', borderRadius: '4px', fontSize: '0.7rem', fontWeight: 500, background: sb.bg, color: sb.c }}>{p.status}</span></td></tr>); })}</tbody>
                 </table>
             </div></div>)}
         </div>

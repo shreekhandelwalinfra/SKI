@@ -596,8 +596,9 @@ export const updateSupportTicket = async (req: AuthRequest, res: Response): Prom
         const ticket = await prisma.supportTicket.update({
             where: { id: req.params.id },
             data: updateData,
+            include: { user: { select: { name: true, uniqueId: true, email: true } } },
         });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'update', ticket });
         res.status(200).json({ status: 'success', data: ticket });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to update ticket' });
@@ -612,8 +613,9 @@ export const markTicketSeen = async (req: AuthRequest, res: Response): Promise<v
                 // @ts-ignore
                 lastSeenByAdmin: new Date()
             },
+            include: { user: { select: { name: true, uniqueId: true, email: true } } },
         });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'update', ticket });
         res.status(200).json({ status: 'success', data: ticket });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to mark ticket as seen' });
@@ -623,7 +625,7 @@ export const markTicketSeen = async (req: AuthRequest, res: Response): Promise<v
 export const deleteSupportTicket = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         await prisma.supportTicket.delete({ where: { id: req.params.id } });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'delete', ticketId: req.params.id });
         res.status(200).json({ status: 'success', message: 'Ticket deleted' });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to delete ticket' });
@@ -653,8 +655,9 @@ export const deleteTicketMessage = async (req: AuthRequest, res: Response): Prom
         const updated = await prisma.supportTicket.update({
             where: { id: req.params.id },
             data: { messages },
+            include: { user: { select: { name: true, uniqueId: true, email: true } } },
         });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'update', ticket: updated });
         res.status(200).json({ status: 'success', data: updated });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to delete message' });

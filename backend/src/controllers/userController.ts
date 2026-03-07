@@ -264,7 +264,7 @@ export const createTicket = async (req: AuthRequest, res: Response): Promise<voi
                 messages: [{ sender: 'user', text: message, time: new Date().toISOString() }],
             },
         });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'create', ticket });
         res.status(201).json({ status: 'success', data: ticket });
     } catch (error: any) {
         res.status(400).json({ status: 'error', message: error.message || 'Failed to create ticket' });
@@ -285,7 +285,7 @@ export const replyToTicket = async (req: AuthRequest, res: Response): Promise<vo
             where: { id: req.params.id },
             data: { messages: existingMessages },
         });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'update', ticket: updated });
         res.status(200).json({ status: 'success', data: updated });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to reply' });
@@ -306,7 +306,7 @@ export const markTicketSeenByUser = async (req: AuthRequest, res: Response): Pro
                 lastSeenByUser: new Date()
             },
         });
-        getIO()?.emit('support:updated');
+        getIO()?.emit('support:updated', { action: 'update', ticket: updated });
         res.status(200).json({ status: 'success', data: updated });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to mark ticket as seen' });

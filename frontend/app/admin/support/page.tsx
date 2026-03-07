@@ -78,7 +78,35 @@ export default function SupportPage() {
         const socket = io(URL, { withCredentials: true });
 
         socket.on('connect', () => console.log('Admin Socket connected:', socket.id));
-        socket.on('support:updated', () => loadTickets(true));
+        socket.on('support:updated', (payload?: { action: string, ticket?: any, ticketId?: string }) => {
+            if (!payload) {
+                loadTickets(true);
+                return;
+            }
+            setTickets(prev => {
+                const { action, ticket, ticketId } = payload;
+                if (action === 'create' && ticket) {
+                    // Check filter: if not matching current filter, ignore
+                    if (statusFilter && ticket.status !== statusFilter) return prev;
+                    if (prev.some(t => t.id === ticket.id)) return prev;
+                    return [ticket, ...prev];
+                } else if (action === 'update' && ticket) {
+                    // If target status no longer matches current filter, remove it
+                    if (statusFilter && ticket.status !== statusFilter) {
+                        return prev.filter(t => t.id !== ticket.id);
+                    }
+                    // If it matches but wasn't in array (e.g. status changed to match), add it
+                    if (!prev.some(t => t.id === ticket.id)) {
+                        return [ticket, ...prev];
+                    }
+                    // Otherwise just update it
+                    return prev.map(t => t.id === ticket.id ? ticket : t);
+                } else if (action === 'delete' && ticketId) {
+                    return prev.filter(t => t.id !== ticketId);
+                }
+                return prev;
+            });
+        });
 
         return () => { socket.disconnect(); };
     }, [statusFilter]);

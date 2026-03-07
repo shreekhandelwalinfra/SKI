@@ -33,7 +33,28 @@ export default function SupportPage() {
     useEffect(() => {
         const URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
         const socket = io(URL, { withCredentials: true });
-        socket.on('support:updated', () => loadTickets(true));
+
+        socket.on('support:updated', (payload?: { action: string, ticket?: any, ticketId?: string }) => {
+            if (!payload) {
+                loadTickets(true);
+                return;
+            }
+            setTickets(prev => {
+                const { action, ticket, ticketId } = payload;
+                if (action === 'create' && ticket) {
+                    // Prepend new ticket, avoid duplicates
+                    if (prev.some(t => t.id === ticket.id)) return prev;
+                    return [ticket, ...prev];
+                } else if (action === 'update' && ticket) {
+                    return prev.map(t => t.id === ticket.id ? ticket : t);
+                } else if (action === 'delete' && ticketId) {
+                    // Note: Users cannot delete tickets currently, but handle it for completeness
+                    return prev.filter(t => t.id !== ticketId);
+                }
+                return prev;
+            });
+        });
+
         return () => { socket.disconnect(); };
     }, []);
 

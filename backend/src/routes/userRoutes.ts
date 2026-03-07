@@ -3,7 +3,7 @@ import {
     getUserDashboard, getMyTeam,
     getUserInvestments, createInvestment,
     getUserPropertyDeals, getUserRewards,
-    getUserTickets, createTicket, replyToTicket,
+    getUserTickets, createTicket, replyToTicket, markTicketSeenByUser,
     getSelfReward, getTeamBonusProfit, getDirectBonusProfit,
     getProfile, updateProfile, changeUserPassword, updateBankDetails,
 } from '../controllers/userController';
@@ -35,5 +35,6 @@ router.get('/profit/direct-bonus', getDirectBonusProfit);
 router.post('/investments', requireActive, createInvestment);
 router.post('/support', requireActive, createTicket);
 router.post('/support/:id/reply', requireActive, replyToTicket);
+router.put('/support/:id/seen', requireActive, markTicketSeenByUser);
 
 export default router;

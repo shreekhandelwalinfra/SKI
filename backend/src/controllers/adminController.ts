@@ -3,7 +3,7 @@ import bcrypt from 'bcryptjs';
 import prisma from '../config/database';
 import { AuthRequest } from '../middleware/auth';
 import { processInstallment, recalcRankBottomUp, evaluateRewards } from '../services/compensationEngine';
-import { emitInvestmentUpdate } from '../config/socket';
+import { emitInvestmentUpdate, getIO } from '../config/socket';
 
 // ─── DASHBOARD ───────────────────────────────────────────
 export const getDashboardStats = async (_req: AuthRequest, res: Response): Promise<void> => {
@@ -541,11 +541,24 @@ export const getUserIncome = async (req: AuthRequest, res: Response): Promise<vo
 };
 
 // ─── SUPPORT ─────────────────────────────────────────────
+
+// Map frontend status strings to DB enum values
+function mapTicketStatus(frontendStatus: string): string {
+    const statusMap: Record<string, string> = {
+        'open': 'OPEN',
+        'in_progress': 'IN_PROGRESS',
+        'inprogress': 'IN_PROGRESS',
+        'resolved': 'RESOLVED',
+    };
+    const key = frontendStatus.toLowerCase().replace(/\s+/g, '');
+    return statusMap[key] || frontendStatus.toUpperCase();
+}
+
 export const getSupportTickets = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { status } = req.query;
         const where: any = {};
-        if (status) where.status = (status as string).toUpperCase().replace(' ', '_');
+        if (status) where.status = mapTicketStatus(status as string);
 
         const tickets = await prisma.supportTicket.findMany({
             where,
@@ -561,13 +574,85 @@ export const getSupportTickets = async (req: AuthRequest, res: Response): Promis
 export const updateSupportTicket = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
         const { status, adminReply } = req.body;
+
+        // Fetch existing ticket to get current messages
+        const existing = await prisma.supportTicket.findUnique({ where: { id: req.params.id } });
+        if (!existing) { res.status(404).json({ status: 'error', message: 'Ticket not found' }); return; }
+
+        // Build update data
+        const updateData: any = {};
+        if (status) updateData.status = mapTicketStatus(status);
+
+        // If admin typed a reply, append it to the messages array and set adminReply
+        if (adminReply && adminReply.trim()) {
+            updateData.adminReply = adminReply;
+            const currentMessages = Array.isArray(existing.messages) ? (existing.messages as any[]) : [];
+            currentMessages.push({ sender: 'admin', text: adminReply.trim(), time: new Date().toISOString() });
+            updateData.messages = currentMessages;
+        }
+
         const ticket = await prisma.supportTicket.update({
             where: { id: req.params.id },
-            data: { status: status.toUpperCase().replace(' ', '_'), adminReply: adminReply || '' },
+            data: updateData,
         });
+        getIO()?.emit('support:updated');
         res.status(200).json({ status: 'success', data: ticket });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to update ticket' });
+    }
+};
+
+export const markTicketSeen = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const ticket = await prisma.supportTicket.update({
+            where: { id: req.params.id },
+            data: { lastSeenByAdmin: new Date() },
+        });
+        getIO()?.emit('support:updated');
+        res.status(200).json({ status: 'success', data: ticket });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message || 'Failed to mark ticket as seen' });
+    }
+};
+
+export const deleteSupportTicket = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        await prisma.supportTicket.delete({ where: { id: req.params.id } });
+        getIO()?.emit('support:updated');
+        res.status(200).json({ status: 'success', message: 'Ticket deleted' });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message || 'Failed to delete ticket' });
+    }
+};
+
+export const deleteTicketMessage = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const messageIndex = parseInt(req.params.messageIndex, 10);
+        if (isNaN(messageIndex)) {
+            res.status(400).json({ status: 'error', message: 'Invalid message index' }); return;
+        }
+
+        const ticket = await prisma.supportTicket.findUnique({ where: { id: req.params.id } });
+        if (!ticket) { res.status(404).json({ status: 'error', message: 'Ticket not found' }); return; }
+
+        const messages = Array.isArray(ticket.messages) ? (ticket.messages as any[]) : [];
+        if (messageIndex < 0 || messageIndex >= messages.length) {
+            res.status(400).json({ status: 'error', message: 'Message index out of bounds' }); return;
+        }
+        // Only allow deleting admin messages
+        if (messages[messageIndex].sender !== 'admin') {
+            res.status(403).json({ status: 'error', message: 'Can only delete admin messages' }); return;
+        }
+
+        messages.splice(messageIndex, 1);
+        const updated = await prisma.supportTicket.update({
+            where: { id: req.params.id },
+            data: { messages },
+        });
+        getIO()?.emit('support:updated');
+        res.status(200).json({ status: 'success', data: updated });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message || 'Failed to delete message' });
     }
 };
 

@@ -374,6 +374,8 @@ model SupportTicket {
   status      TicketStatus @default(OPEN)
   adminReply  String       @default("")
   messages    Json         @default("[]")
+  lastSeenByAdmin DateTime?            // null = never seen by admin
+  lastSeenByUser  DateTime?            // null = never seen by user (for read receipts)
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 

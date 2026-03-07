@@ -7,7 +7,7 @@ import {
     getPropertyDeals, createPropertyDeal, addInstallment,
     getRewards,
     getFirmProfit, getTeamBonus, getUserIncome,
-    getSupportTickets, updateSupportTicket,
+    getSupportTickets, updateSupportTicket, markTicketSeen, deleteSupportTicket, deleteTicketMessage,
     changePassword,
     getAdminUserTree, updateUserBalances,
     cleanupDataHandler
@@ -50,6 +50,9 @@ router.get('/profit/user-income', getUserIncome);
 // Support
 router.get('/support', getSupportTickets);
 router.put('/support/:id', updateSupportTicket);
+router.put('/support/:id/seen', markTicketSeen);
+router.delete('/support/:id', deleteSupportTicket);
+router.delete('/support/:id/message/:messageIndex', deleteTicketMessage);
 
 // Change Password
 router.put('/change-password', changePassword);

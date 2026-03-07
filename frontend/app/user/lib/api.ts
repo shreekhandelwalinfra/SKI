@@ -157,6 +157,10 @@ export const replyToUserTicket = async (id: string, message: string) => {
     return apiCall(`/user/support/${id}/reply`, { method: 'POST', body: JSON.stringify({ message }) });
 };
 
+export const markTicketSeenByUser = async (id: string) => {
+    return apiCall(`/user/support/${id}/seen`, { method: 'PUT' });
+};
+
 // ─── PROFIT ──────────────────────────────────────────────
 
 export const getSelfReward = async () => {

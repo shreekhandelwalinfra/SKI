@@ -2,7 +2,7 @@ import { Response } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../config/database';
 import { AuthRequest } from '../middleware/auth';
-import { emitInvestmentUpdate } from '../config/socket';
+import { emitInvestmentUpdate, getIO } from '../config/socket';
 
 // ─── DASHBOARD ───────────────────────────────────────────
 export const getUserDashboard = async (req: AuthRequest, res: Response): Promise<void> => {
@@ -264,6 +264,7 @@ export const createTicket = async (req: AuthRequest, res: Response): Promise<voi
                 messages: [{ sender: 'user', text: message, time: new Date().toISOString() }],
             },
         });
+        getIO()?.emit('support:updated');
         res.status(201).json({ status: 'success', data: ticket });
     } catch (error: any) {
         res.status(400).json({ status: 'error', message: error.message || 'Failed to create ticket' });
@@ -284,9 +285,28 @@ export const replyToTicket = async (req: AuthRequest, res: Response): Promise<vo
             where: { id: req.params.id },
             data: { messages: existingMessages },
         });
+        getIO()?.emit('support:updated');
         res.status(200).json({ status: 'success', data: updated });
     } catch (error: any) {
         res.status(500).json({ status: 'error', message: error.message || 'Failed to reply' });
+    }
+};
+
+export const markTicketSeenByUser = async (req: AuthRequest, res: Response): Promise<void> => {
+    try {
+        const ticket = await prisma.supportTicket.findFirst({
+            where: { id: req.params.id, userId: req.user?.id },
+        });
+        if (!ticket) { res.status(404).json({ status: 'error', message: 'Ticket not found' }); return; }
+
+        const updated = await prisma.supportTicket.update({
+            where: { id: req.params.id },
+            data: { lastSeenByUser: new Date() },
+        });
+        getIO()?.emit('support:updated');
+        res.status(200).json({ status: 'success', data: updated });
+    } catch (error: any) {
+        res.status(500).json({ status: 'error', message: error.message || 'Failed to mark ticket as seen' });
     }
 };
 

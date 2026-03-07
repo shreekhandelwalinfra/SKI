@@ -1,7 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getUserTickets, createUserTicket, replyToUserTicket } from '../lib/api';
+import { getUserTickets, createUserTicket, replyToUserTicket, markTicketSeenByUser } from '../lib/api';
+
+import { io } from 'socket.io-client';
+import { useRef } from 'react';
 
 export default function SupportPage() {
     const [tickets, setTickets] = useState<any[]>([]);
@@ -12,14 +15,79 @@ export default function SupportPage() {
     const [expandedId, setExpandedId] = useState<string | null>(null);
     const [replyText, setReplyText] = useState('');
     const [replying, setReplying] = useState(false);
+    const messagesEndRef = useRef<HTMLDivElement>(null);
 
-    useEffect(() => { getUserTickets().then(res => { setTickets(res.data); setLoading(false); }).catch(() => setLoading(false)); }, []);
+    const loadTickets = async (silent = false) => {
+        if (!silent) setLoading(true);
+        try {
+            const res = await getUserTickets();
+            setTickets(res.data);
+        } catch { } finally {
+            if (!silent) setLoading(false);
+        }
+    };
+
+    useEffect(() => { loadTickets(); }, []);
+
+    // WebSocket connection for real-time updates (User)
+    useEffect(() => {
+        const URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
+        const socket = io(URL, { withCredentials: true });
+        socket.on('support:updated', () => loadTickets(true));
+        return () => { socket.disconnect(); };
+    }, []);
+
+    // Auto-mark as seen if ticket is currently expanded and receives new admin messages
+    useEffect(() => {
+        if (!expandedId) return;
+
+        // Auto-scroll to bottom of messages
+        if (messagesEndRef.current) {
+            messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        const ticket = tickets.find(t => t.id === expandedId);
+        if (ticket && hasNewAdminMsg(ticket)) {
+            // optimistically update local state to avoid rapid re-fires
+            setTickets(prev => prev.map(t =>
+                t.id === expandedId ? { ...t, lastSeenByUser: new Date().toISOString() } : t
+            ));
+            markTicketSeenByUser(expandedId).catch(() => { });
+        }
+    }, [tickets, expandedId]);
 
     const handleCreate = async (e: React.FormEvent) => { e.preventDefault(); setSubmitting(true); try { const res = await createUserTicket(form); setTickets(prev => [res.data, ...prev]); setForm({ subject: '', message: '' }); setShowForm(false); } catch { } finally { setSubmitting(false); } };
-    const handleReply = async (id: string) => { if (!replyText.trim()) return; setReplying(true); try { const res = await replyToUserTicket(id, replyText); setTickets(prev => prev.map(t => t.id === id ? res.data : t)); setReplyText(''); } catch { } finally { setReplying(false); } };
+    const handleReply = async (id: string) => { if (!replyText.trim()) return; setReplying(true); try { await replyToUserTicket(id, replyText); setReplyText(''); } catch { } finally { setReplying(false); } };
+
+    // Expand ticket and mark as seen by user
+    const handleExpand = async (id: string) => {
+        if (expandedId === id) { setExpandedId(null); return; }
+        setExpandedId(id);
+        setReplyText('');
+        // Check if there are unseen admin messages
+        const ticket = tickets.find(t => t.id === id);
+        if (ticket) {
+            const msgs = Array.isArray(ticket.messages) ? ticket.messages : [];
+            const lastSeen = ticket.lastSeenByUser ? new Date(ticket.lastSeenByUser).getTime() : 0;
+            const hasNewAdmin = msgs.some((m: any) => m.sender === 'admin' && (!ticket.lastSeenByUser || new Date(m.time).getTime() > lastSeen));
+            if (hasNewAdmin) {
+                try {
+                    await markTicketSeenByUser(id);
+                    setTickets(prev => prev.map(t => t.id === id ? { ...t, lastSeenByUser: new Date().toISOString() } : t));
+                } catch { /* silent */ }
+            }
+        }
+    };
 
     const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
     const sBadge = (s: string) => s === 'RESOLVED' ? { bg: 'rgba(52,211,153,0.1)', c: '#34D399' } : s === 'IN_PROGRESS' ? { bg: 'rgba(96,165,250,0.1)', c: '#60A5FA' } : { bg: 'rgba(251,191,36,0.1)', c: '#FBBF24' };
+
+    // Check if ticket has unseen admin messages
+    const hasNewAdminMsg = (t: any) => {
+        const msgs = Array.isArray(t.messages) ? t.messages : [];
+        const lastSeen = t.lastSeenByUser ? new Date(t.lastSeenByUser).getTime() : 0;
+        return msgs.some((m: any) => m.sender === 'admin' && (!t.lastSeenByUser || new Date(m.time).getTime() > lastSeen));
+    };
 
     if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '16rem' }}><div className="skeleton" style={{ width: '200px', height: '16px' }} /></div>;
 
@@ -53,12 +121,20 @@ export default function SupportPage() {
                         const sb = sBadge(t.status);
                         const isExpanded = expandedId === t.id;
                         const msgs = t.messages || [];
+                        const hasNew = hasNewAdminMsg(t);
                         return (
-                            <div key={t.id} className="card" style={{ borderRadius: '10px', overflow: 'hidden', border: '1px solid var(--border-color)' }}>
-                                <div onClick={() => setExpandedId(isExpanded ? null : t.id)}
+                            <div key={t.id} className="card" style={{ borderRadius: '10px', overflow: 'hidden', border: `1px solid ${hasNew ? 'var(--accent-copper)' : 'var(--border-color)'}` }}>
+                                <div onClick={() => handleExpand(t.id)}
                                     style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '1rem 1.25rem', cursor: 'pointer', borderBottom: isExpanded ? '1px solid var(--border-subtle)' : 'none', transition: 'background 0.2s' }}>
                                     <div>
-                                        <div style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-inter), sans-serif' }}>{t.subject}</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                                            <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-inter), sans-serif' }}>{t.subject}</span>
+                                            {hasNew && (
+                                                <span style={{ padding: '1px 7px', borderRadius: '999px', fontSize: '0.6rem', fontWeight: 700, background: 'var(--accent-copper)', color: '#fff', letterSpacing: '0.05em' }}>
+                                                    NEW REPLY
+                                                </span>
+                                            )}
+                                        </div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem', fontFamily: 'var(--font-inter), sans-serif' }}>{formatDate(t.createdAt)}</div>
                                     </div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -78,10 +154,24 @@ export default function SupportPage() {
                                                     </div>
                                                 </div>
                                             ))}
+                                            <div ref={messagesEndRef} />
                                         </div>
                                         {t.status !== 'RESOLVED' && (
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <input value={replyText} onChange={e => setReplyText(e.target.value)} className="input" placeholder="Type your reply..." style={{ flex: 1 }} />
+                                                <textarea
+                                                    value={replyText}
+                                                    onChange={e => setReplyText(e.target.value)}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key === 'Enter' && !e.shiftKey) {
+                                                            e.preventDefault();
+                                                            handleReply(t.id);
+                                                        }
+                                                    }}
+                                                    className="input"
+                                                    placeholder="Type your reply... (Enter to send, Shift+Enter for new line)"
+                                                    style={{ flex: 1, resize: 'vertical', minHeight: '40px', padding: '0.6rem' }}
+                                                    rows={1}
+                                                />
                                                 <button onClick={() => handleReply(t.id)} disabled={replying} className="btn btn-primary" style={{ borderRadius: '4px', fontSize: '0.75rem', padding: '0.5rem 1.25rem' }}>
                                                     {replying ? '...' : 'Send'}
                                                 </button>

@@ -236,6 +236,18 @@ export const updateSupportTicket = async (id: string, data: any) => {
     return apiCall(`/admin/support/${id}`, { method: 'PUT', body: JSON.stringify(data) });
 };
 
+export const markTicketSeen = async (id: string) => {
+    return apiCall(`/admin/support/${id}/seen`, { method: 'PUT' });
+};
+
+export const deleteSupportTicket = async (id: string) => {
+    return apiCall(`/admin/support/${id}`, { method: 'DELETE' });
+};
+
+export const deleteTicketMessage = async (id: string, messageIndex: number) => {
+    return apiCall(`/admin/support/${id}/message/${messageIndex}`, { method: 'DELETE' });
+};
+
 // Password
 export const changePassword = async (data: { currentPassword: string; newPassword: string }) => {
     if (MOCK_MODE) {

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getUserTickets, createUserTicket, replyToUserTicket, markTicketSeenByUser } from '../lib/api';
 
-import { io } from 'socket.io-client';
+import { useSocket } from '../../../lib/SocketContext';
 import { useRef } from 'react';
 
 export default function SupportPage() {
@@ -16,6 +16,7 @@ export default function SupportPage() {
     const [replyText, setReplyText] = useState('');
     const [replying, setReplying] = useState(false);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { socket } = useSocket();
 
     const loadTickets = async (silent = false) => {
         if (!silent) setLoading(true);
@@ -31,10 +32,7 @@ export default function SupportPage() {
 
     // WebSocket connection for real-time updates (User)
     useEffect(() => {
-        const URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
-        const socket = io(URL, { withCredentials: true });
-
-        socket.on('support:updated', (payload?: { action: string, ticket?: any, ticketId?: string }) => {
+        const handleUpdate = (payload?: { action: string, ticket?: any, ticketId?: string }) => {
             if (!payload) {
                 loadTickets(true);
                 return;
@@ -53,10 +51,14 @@ export default function SupportPage() {
                 }
                 return prev;
             });
-        });
+        };
 
-        return () => { socket.disconnect(); };
-    }, []);
+        socket.on('support:updated', handleUpdate);
+
+        return () => {
+            socket.off('support:updated', handleUpdate);
+        };
+    }, [socket]);
 
     // Auto-mark as seen if ticket is currently expanded and receives new admin messages
     useEffect(() => {

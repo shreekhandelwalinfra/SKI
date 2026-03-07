@@ -1,8 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { io } from 'socket.io-client';
 import { getDashboardStats, cleanupData } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 interface DashboardData {
     totalUsers: number;
@@ -58,28 +59,20 @@ const statCards = [
 ];
 
 export default function DashboardPage() {
-    const [data, setData] = useState<DashboardData | null>(null);
-    const [loading, setLoading] = useState(true);
     const [isCleaning, setIsCleaning] = useState(false);
+    const { socket } = useSocket();
 
-    const loadStats = async () => {
-        try {
-            const res = await getDashboardStats();
-            setData(res.data);
-        } catch (err) {
-            console.error('Failed to load dashboard stats:', err);
-        } finally {
-            setLoading(false);
-        }
+    const fetchStats = async () => {
+        const res = await getDashboardStats();
+        return res.data;
     };
 
-    useEffect(() => { loadStats(); }, []);
+    const { data, isLoading: loading, mutate: loadStats } = useSWR('admin_dashboard_stats', fetchStats);
 
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
         socket.on('investment:updated', loadStats);
-        return () => { socket.disconnect(); };
-    }, []);
+        return () => { socket.off('investment:updated', loadStats); };
+    }, [socket, loadStats]);
 
     const formatValue = (value: number, isCurrency?: boolean) => {
         if (isCurrency) {

@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import { getMyTeam } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 interface TeamNode {
     id: string; name: string; email: string; phone: string; uniqueId: string;
@@ -83,30 +84,29 @@ function MemberCard({ node, expanded, toggleExpand }: { node: TeamNode; expanded
 }
 
 export default function MyTeamPage() {
-    const [tree, setTree] = useState<TeamNode[]>([]);
-    const [referredBy, setReferredBy] = useState<any>(null);
-    const [total, setTotal] = useState(0);
-    const [loading, setLoading] = useState(true);
     const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const { socket } = useSocket();
 
-    const loadTeam = () => getMyTeam().then(res => {
-        setTree(res.data || []);
-        setTotal(res.total || 0);
-        setReferredBy(res.referredBy || null);
-        setLoading(false);
-        // Auto-expand first level
+    const fetchTeam = async () => {
+        const res = await getMyTeam();
+
+        // Auto-expand first level on fetch
         const autoExpand: Record<string, boolean> = {};
         (res.data || []).forEach((n: TeamNode) => { if (n.children.length > 0) autoExpand[n.id] = true; });
         setExpanded(prev => ({ ...autoExpand, ...prev }));
-    }).catch(() => setLoading(false));
 
-    useEffect(() => { loadTeam(); }, []);
+        return res;
+    };
+
+    const { data, isLoading: loading, mutate: loadTeam } = useSWR('user_team', fetchTeam);
+    const tree = data?.data || [];
+    const total = data?.total || 0;
+    const referredBy = data?.referredBy || null;
 
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
         socket.on('investment:updated', loadTeam);
-        return () => { socket.disconnect(); };
-    }, []);
+        return () => { socket.off('investment:updated', loadTeam); };
+    }, [socket, loadTeam]);
 
     const toggleExpand = (id: string) => setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
 
@@ -150,7 +150,7 @@ export default function MyTeamPage() {
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '0.75rem' }}>
-                    {tree.map(node => (
+                    {tree.map((node: TeamNode) => (
                         <MemberCard key={node.id} node={node} expanded={expanded} toggleExpand={toggleExpand} />
                     ))}
                 </div>

@@ -44,7 +44,7 @@ function unseenCount(ticket: TicketItem): number {
     return msgs.filter(m => m.sender === 'user' && new Date(m.time).getTime() > lastSeen).length;
 }
 
-import { io } from 'socket.io-client';
+import { useSocket } from '../../../lib/SocketContext';
 import { useRef } from 'react';
 
 export default function SupportPage() {
@@ -57,6 +57,7 @@ export default function SupportPage() {
     const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
     const [confirmDeleteMsg, setConfirmDeleteMsg] = useState<{ ticketId: string, index: number } | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const { socket } = useSocket();
 
     const loadTickets = async (silent = false) => {
         if (!silent) setLoading(true);
@@ -74,11 +75,7 @@ export default function SupportPage() {
 
     // WebSocket connection for real-time updates
     useEffect(() => {
-        const URL = process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000';
-        const socket = io(URL, { withCredentials: true });
-
-        socket.on('connect', () => console.log('Admin Socket connected:', socket.id));
-        socket.on('support:updated', (payload?: { action: string, ticket?: any, ticketId?: string }) => {
+        const handleUpdate = (payload?: { action: string, ticket?: any, ticketId?: string }) => {
             if (!payload) {
                 loadTickets(true);
                 return;
@@ -106,10 +103,14 @@ export default function SupportPage() {
                 }
                 return prev;
             });
-        });
+        };
 
-        return () => { socket.disconnect(); };
-    }, [statusFilter]);
+        socket.on('support:updated', handleUpdate);
+
+        return () => {
+            socket.off('support:updated', handleUpdate);
+        };
+    }, [socket, statusFilter]);
 
     // Auto-mark as seen and auto-scroll if ticket is currently expanded
     useEffect(() => {

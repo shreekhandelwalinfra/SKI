@@ -1,12 +1,11 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import { getUserInvestments, createUserInvestment } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 export default function InvestmentsPage() {
-    const [investments, setInvestments] = useState<any[]>([]);
-    const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
     const [form, setForm] = useState({
         propertyName: '', plotAreaSize: '', propertyValue: '',
@@ -15,22 +14,21 @@ export default function InvestmentsPage() {
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
+    const { socket } = useSocket();
 
-    const loadInvestments = () => getUserInvestments()
-        .then(res => { setInvestments(res.data); setLoading(false); })
-        .catch(err => { console.error('Load error:', err.message); setLoading(false); });
+    const fetchInvestments = async () => {
+        const res = await getUserInvestments();
+        return res.data;
+    };
 
-    // Load once on mount
-    useEffect(() => { loadInvestments(); }, []);
+    const { data: investmentsData, isLoading: loading, mutate: loadInvestments } = useSWR('user_investments', fetchInvestments);
+    const investments = investmentsData || [];
 
     // Socket.io — listen for real-time investment changes
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
-        socket.on('investment:updated', () => {
-            loadInvestments(); // Refresh instantly when admin changes status
-        });
-        return () => { socket.disconnect(); };
-    }, []);
+        socket.on('investment:updated', loadInvestments);
+        return () => { socket.off('investment:updated', loadInvestments); };
+    }, [socket, loadInvestments]);
 
     const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
     const fmt = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n);
@@ -48,7 +46,7 @@ export default function InvestmentsPage() {
                 installmentNo: form.isFinal ? 'Final' : form.installmentNo,
             };
             const res = await createUserInvestment(payload);
-            setInvestments(prev => [res.data, ...prev]);
+            loadInvestments();
             setForm({ propertyName: '', plotAreaSize: '', propertyValue: '', propertyAddress: '', amount: '', installmentNo: '1', isFinal: false });
             setShowForm(false);
             setSuccess('Investment submitted successfully! It will appear after admin approval.');
@@ -164,7 +162,7 @@ export default function InvestmentsPage() {
                             ))}
                         </tr></thead>
                         <tbody>
-                            {investments.length === 0 ? <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No investments yet</td></tr> : investments.map((inv, i) => {
+                            {investments.length === 0 ? <tr><td colSpan={8} style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>No investments yet</td></tr> : investments.map((inv: any, i: number) => {
                                 const sb = sBadge(inv.status);
                                 return (
                                     <tr key={inv.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>

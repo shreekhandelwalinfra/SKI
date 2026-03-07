@@ -1,8 +1,9 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
-import { io } from 'socket.io-client';
+import { useState, useEffect } from 'react';
 import { getInvestments, updateInvestmentStatus } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 interface InvestmentItem {
     id: string;
@@ -22,36 +23,28 @@ interface InvestmentItem {
 }
 
 export default function InvestmentsPage() {
-    const [investments, setInvestments] = useState<InvestmentItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [statusFilter, setStatusFilter] = useState('');
     const [confirmModal, setConfirmModal] = useState<{ id: string; status: string; name: string } | null>(null);
     const [updating, setUpdating] = useState(false);
     const [expandedId, setExpandedId] = useState<string | null>(null);
+    const { socket } = useSocket();
 
-    const loadInvestments = useCallback(async () => {
-        try {
-            const res = await getInvestments(statusFilter ? `status=${statusFilter}` : undefined);
-            setInvestments(res.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
-    }, [statusFilter]);
+    const fetchInvestments = async () => {
+        const res = await getInvestments(statusFilter ? `status=${statusFilter}` : undefined);
+        return res.data;
+    };
 
-    useEffect(() => {
-        loadInvestments();
-    }, [loadInvestments]);
+    const { data: investmentsData, isLoading: loading, mutate: loadInvestments } = useSWR(
+        ['admin_investments', statusFilter],
+        fetchInvestments
+    );
+    const investments = investmentsData || [];
 
     // Socket.io — listen for real-time investment changes
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
-        socket.on('investment:updated', () => {
-            loadInvestments(); // Refresh data instantly when server pushes an update
-        });
-        return () => { socket.disconnect(); };
-    }, [loadInvestments]);
+        socket.on('investment:updated', loadInvestments);
+        return () => { socket.off('investment:updated', loadInvestments); };
+    }, [socket, loadInvestments]);
 
     const handleStatusUpdate = async () => {
         if (!confirmModal) return;
@@ -135,7 +128,7 @@ export default function InvestmentsPage() {
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {investments.map((inv) => {
+                    {investments.map((inv: InvestmentItem) => {
                         const ss = statusStyles[inv.status] || statusStyles.PENDING;
                         const isExpanded = expandedId === inv.id;
 

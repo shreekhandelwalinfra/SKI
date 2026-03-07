@@ -1,24 +1,26 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
 import { getUserDashboard } from '../lib/api';
+import useSWR from 'swr';
+import { useSocket } from '../../../lib/SocketContext';
 
 export default function UserDashboardPage() {
-    const [data, setData] = useState<any>(null);
-    const [loading, setLoading] = useState(true);
     const [copied, setCopied] = useState('');
+    const { socket } = useSocket();
 
-    const loadData = () => getUserDashboard().then(res => { setData(res.data); setLoading(false); }).catch(() => setLoading(false));
+    const fetchDashboard = async () => {
+        const res = await getUserDashboard();
+        return res.data;
+    };
 
-    useEffect(() => { loadData(); }, []);
+    const { data, isLoading: loading, mutate: loadData } = useSWR('user_dashboard', fetchDashboard);
 
     // Real-time: refresh dashboard when investments change
     useEffect(() => {
-        const socket = io(process.env.NEXT_PUBLIC_API_URL?.replace('/api', '') || 'http://localhost:5000');
         socket.on('investment:updated', loadData);
-        return () => { socket.disconnect(); };
-    }, []);
+        return () => { socket.off('investment:updated', loadData); };
+    }, [socket, loadData]);
 
     const copyText = (text: string, key: string) => { navigator.clipboard.writeText(text); setCopied(key); setTimeout(() => setCopied(''), 2000); };
     const shareWhatsApp = () => {

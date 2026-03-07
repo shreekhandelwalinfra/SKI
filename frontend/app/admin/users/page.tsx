@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { getUsers, blockUser, deleteUser, getAdminUserTree, updateUserBalances } from '../lib/api';
+import useSWR from 'swr';
 
 interface UserItem {
     id?: string;
@@ -165,8 +166,6 @@ const TreeNode = ({ n, level = 0, onEdit, onBlock, onDelete }: { n: any, level?:
 };
 
 export default function UsersPage() {
-    const [users, setUsers] = useState<UserItem[]>([]);
-    const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [filter, setFilter] = useState<'all' | 'blocked'>('all');
 
@@ -180,24 +179,23 @@ export default function UsersPage() {
     const [editForm, setEditForm] = useState<any>({});
     const [editSaving, setEditSaving] = useState(false);
 
-    useEffect(() => {
-        loadUsers();
-    }, [filter, search]);
-
-    const loadUsers = async () => {
-        setLoading(true);
-        try {
-            let params = '';
-            if (filter === 'blocked') params += 'status=blocked';
-            if (search) params += `${params ? '&' : ''}search=${encodeURIComponent(search)}`;
-            const res = await getUsers(params || undefined);
-            setUsers(res.data);
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setLoading(false);
-        }
+    // SWR Fetcher
+    const fetchUsers = async () => {
+        let params = '';
+        if (filter === 'blocked') params += 'status=blocked';
+        if (search) params += `${params ? '&' : ''}search=${encodeURIComponent(search)}`;
+        const res = await getUsers(params || undefined);
+        return res.data;
     };
+
+    const { data: usersData, isLoading: loading, mutate: loadUsers } = useSWR(
+        ['admin_users', filter, search],
+        fetchUsers
+    );
+
+    const users = usersData || [];
+
+
 
     const handleBlock = async (id: string) => {
         try {
@@ -392,7 +390,7 @@ export default function UsersPage() {
                 </div>
             ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(370px, 1fr))', gap: '1rem' }}>
-                    {users.map(user => {
+                    {users.map((user: UserItem) => {
                         const sc = statusColor(user.status);
                         const uid = (user.id || user._id) as string;
                         return (

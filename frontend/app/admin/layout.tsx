@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useTheme } from '../components/ThemeProvider';
 import { SocketProvider } from '../../lib/SocketContext';
+import { SWRProvider } from '../../lib/SWRProvider';
 
 const sidebarItems = [
     {
@@ -64,146 +65,148 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
     const currentLabel = sidebarItems.find(i => i.href === pathname)?.label || 'Admin';
 
     return (
-        <SocketProvider>
-            <div data-theme="dark" style={{ display: 'flex', minHeight: '100vh', background: 'var(--admin-bg)' }}>
-                {/* Mobile overlay */}
-                {sidebarOpen && (
-                    <div
-                        className="fixed inset-0 z-40 lg:hidden animate-fadeIn"
-                        style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
-                        onClick={() => setSidebarOpen(false)}
-                    />
-                )}
+        <SWRProvider>
+            <SocketProvider>
+                <div data-theme="dark" style={{ display: 'flex', minHeight: '100vh', background: 'var(--admin-bg)' }}>
+                    {/* Mobile overlay */}
+                    {sidebarOpen && (
+                        <div
+                            className="fixed inset-0 z-40 lg:hidden animate-fadeIn"
+                            style={{ background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
+                            onClick={() => setSidebarOpen(false)}
+                        />
+                    )}
 
-                {/* ── SIDEBAR ── */}
-                <aside
-                    className={`fixed lg:sticky top-0 left-0 h-screen z-50 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
-                    style={{
-                        width: '260px', flexShrink: 0,
-                        background: 'var(--admin-sidebar-bg, linear-gradient(180deg, #0D0D18 0%, #111120 60%, #0A0A14 100%))',
-                        borderRight: '1px solid var(--admin-border)',
-                    }}
-                >
-                    {/* Brand */}
-                    <div style={{ padding: '1.5rem 1.25rem', borderBottom: '1px solid var(--admin-border)' }}>
-                        <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-                            <div style={{
-                                width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
-                                background: 'linear-gradient(135deg, rgba(196,149,106,0.2), rgba(27,42,74,0.4))',
-                                border: '1px solid rgba(196,149,106,0.35)',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            }}>
-                                <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-                                    <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="#C4956A" strokeWidth="1.5" />
-                                    <text x="20" y="23" textAnchor="middle" fontFamily="Georgia,serif" fontSize="10" fontWeight="700" fill="#C4956A" letterSpacing="1">SKI</text>
-                                </svg>
-                            </div>
-                            <div>
-                                <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F5F0EB', letterSpacing: '0.05em', fontFamily: 'var(--font-playfair), Georgia, serif' }}>SKI Admin</div>
-                                <div style={{ fontSize: '0.6rem', color: '#C4956A', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'var(--font-inter), sans-serif' }}>Control Panel</div>
-                            </div>
-                        </Link>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav style={{ flex: 1, padding: '1rem 0.75rem', overflowY: 'auto' }}>
-                        <div style={{ fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#636380', padding: '0 0.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>
-                            Navigation
-                        </div>
-                        {sidebarItems.map(item => {
-                            const isActive = pathname === item.href;
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={() => setSidebarOpen(false)}
-                                    style={{
-                                        display: 'flex', alignItems: 'center', gap: '0.75rem',
-                                        padding: '0.65rem 0.75rem', borderRadius: '10px', marginBottom: '2px',
-                                        background: isActive ? 'rgba(196,149,106,0.1)' : 'transparent',
-                                        color: isActive ? '#C4956A' : '#7A7A8A',
-                                        textDecoration: 'none',
-                                        fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.82rem',
-                                        fontWeight: isActive ? 600 : 400,
-                                        transition: 'all 0.2s ease',
-                                        borderLeft: isActive ? '2px solid #C4956A' : '2px solid transparent',
-                                        boxShadow: isActive ? '0 0 20px rgba(196,149,106,0.08)' : 'none',
-                                    }}
-                                >
-                                    <span style={{ opacity: isActive ? 1 : 0.4, transition: 'opacity 0.2s' }}>{item.icon}</span>
-                                    {item.label}
-                                    {isActive && (
-                                        <span style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: '#C4956A', boxShadow: '0 0 6px #C4956A' }} />
-                                    )}
-                                </Link>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Footer actions */}
-                    <div style={{ padding: '0.75rem', borderTop: '1px solid var(--admin-border)' }}>
-                        <button
-                            onClick={handleLogout}
-                            style={{
-                                display: 'flex', alignItems: 'center', gap: '0.75rem',
-                                width: '100%', padding: '0.65rem 0.75rem', borderRadius: '10px',
-                                border: 'none', cursor: 'pointer',
-                                background: 'rgba(244, 63, 94, 0.06)', color: '#f43f5e',
-                                fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.82rem',
-                                transition: 'all 0.2s ease',
-                            }}
-                        >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
-                            Logout
-                        </button>
-                    </div>
-                </aside>
-
-                {/* ── MAIN ── */}
-                <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
-                    {/* Top header */}
-                    <header style={{
-                        position: 'sticky', top: 0, zIndex: 30,
-                        background: 'var(--admin-header-bg, rgba(7,7,16,0.85))', backdropFilter: 'blur(16px)',
-                        borderBottom: '1px solid var(--admin-border)',
-                    }}>
-                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.9rem 1.5rem' }}>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                                {/* Mobile hamburger */}
-                                <button
-                                    onClick={() => setSidebarOpen(!sidebarOpen)}
-                                    className="lg:hidden"
-                                    style={{ padding: '0.4rem', border: 'none', cursor: 'pointer', background: 'rgba(196,149,106,0.1)', borderRadius: '8px', color: '#C4956A' }}
-                                >
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
-                                </button>
-                                {/* Breadcrumb */}
+                    {/* ── SIDEBAR ── */}
+                    <aside
+                        className={`fixed lg:sticky top-0 left-0 h-screen z-50 flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}`}
+                        style={{
+                            width: '260px', flexShrink: 0,
+                            background: 'var(--admin-sidebar-bg, linear-gradient(180deg, #0D0D18 0%, #111120 60%, #0A0A14 100%))',
+                            borderRight: '1px solid var(--admin-border)',
+                        }}
+                    >
+                        {/* Brand */}
+                        <div style={{ padding: '1.5rem 1.25rem', borderBottom: '1px solid var(--admin-border)' }}>
+                            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
+                                <div style={{
+                                    width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
+                                    background: 'linear-gradient(135deg, rgba(196,149,106,0.2), rgba(27,42,74,0.4))',
+                                    border: '1px solid rgba(196,149,106,0.35)',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                }}>
+                                    <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
+                                        <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="#C4956A" strokeWidth="1.5" />
+                                        <text x="20" y="23" textAnchor="middle" fontFamily="Georgia,serif" fontSize="10" fontWeight="700" fill="#C4956A" letterSpacing="1">SKI</text>
+                                    </svg>
+                                </div>
                                 <div>
-                                    <span style={{ fontSize: '0.6rem', color: '#7A7A8A', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'var(--font-inter), sans-serif' }}>Admin /</span>
-                                    {' '}
-                                    <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#F5F0EB', fontFamily: 'var(--font-inter), sans-serif' }}>{currentLabel}</span>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F5F0EB', letterSpacing: '0.05em', fontFamily: 'var(--font-playfair), Georgia, serif' }}>SKI Admin</div>
+                                    <div style={{ fontSize: '0.6rem', color: '#C4956A', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'var(--font-inter), sans-serif' }}>Control Panel</div>
+                                </div>
+                            </Link>
+                        </div>
+
+                        {/* Navigation */}
+                        <nav style={{ flex: 1, padding: '1rem 0.75rem', overflowY: 'auto' }}>
+                            <div style={{ fontSize: '0.58rem', letterSpacing: '0.2em', textTransform: 'uppercase', color: '#636380', padding: '0 0.5rem', marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>
+                                Navigation
+                            </div>
+                            {sidebarItems.map(item => {
+                                const isActive = pathname === item.href;
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        onClick={() => setSidebarOpen(false)}
+                                        style={{
+                                            display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                            padding: '0.65rem 0.75rem', borderRadius: '10px', marginBottom: '2px',
+                                            background: isActive ? 'rgba(196,149,106,0.1)' : 'transparent',
+                                            color: isActive ? '#C4956A' : '#7A7A8A',
+                                            textDecoration: 'none',
+                                            fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.82rem',
+                                            fontWeight: isActive ? 600 : 400,
+                                            transition: 'all 0.2s ease',
+                                            borderLeft: isActive ? '2px solid #C4956A' : '2px solid transparent',
+                                            boxShadow: isActive ? '0 0 20px rgba(196,149,106,0.08)' : 'none',
+                                        }}
+                                    >
+                                        <span style={{ opacity: isActive ? 1 : 0.4, transition: 'opacity 0.2s' }}>{item.icon}</span>
+                                        {item.label}
+                                        {isActive && (
+                                            <span style={{ marginLeft: 'auto', width: '6px', height: '6px', borderRadius: '50%', background: '#C4956A', boxShadow: '0 0 6px #C4956A' }} />
+                                        )}
+                                    </Link>
+                                );
+                            })}
+                        </nav>
+
+                        {/* Footer actions */}
+                        <div style={{ padding: '0.75rem', borderTop: '1px solid var(--admin-border)' }}>
+                            <button
+                                onClick={handleLogout}
+                                style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.75rem',
+                                    width: '100%', padding: '0.65rem 0.75rem', borderRadius: '10px',
+                                    border: 'none', cursor: 'pointer',
+                                    background: 'rgba(244, 63, 94, 0.06)', color: '#f43f5e',
+                                    fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.82rem',
+                                    transition: 'all 0.2s ease',
+                                }}
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" /></svg>
+                                Logout
+                            </button>
+                        </div>
+                    </aside>
+
+                    {/* ── MAIN ── */}
+                    <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column' }}>
+                        {/* Top header */}
+                        <header style={{
+                            position: 'sticky', top: 0, zIndex: 30,
+                            background: 'var(--admin-header-bg, rgba(7,7,16,0.85))', backdropFilter: 'blur(16px)',
+                            borderBottom: '1px solid var(--admin-border)',
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.9rem 1.5rem' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                                    {/* Mobile hamburger */}
+                                    <button
+                                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                                        className="lg:hidden"
+                                        style={{ padding: '0.4rem', border: 'none', cursor: 'pointer', background: 'rgba(196,149,106,0.1)', borderRadius: '8px', color: '#C4956A' }}
+                                    >
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" /></svg>
+                                    </button>
+                                    {/* Breadcrumb */}
+                                    <div>
+                                        <span style={{ fontSize: '0.6rem', color: '#7A7A8A', letterSpacing: '0.15em', textTransform: 'uppercase', fontFamily: 'var(--font-inter), sans-serif' }}>Admin /</span>
+                                        {' '}
+                                        <span style={{ fontSize: '0.85rem', fontWeight: 600, color: '#F5F0EB', fontFamily: 'var(--font-inter), sans-serif' }}>{currentLabel}</span>
+                                    </div>
+                                </div>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                    {/* Avatar */}
+                                    <div style={{
+                                        width: '34px', height: '34px', borderRadius: '50%',
+                                        background: 'linear-gradient(135deg, #C4956A, #D4A574)',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        color: '#fff', fontFamily: 'var(--font-playfair), serif', fontWeight: 700, fontSize: '0.85rem',
+                                        boxShadow: '0 0 12px rgba(196,149,106,0.35)',
+                                    }}>A</div>
                                 </div>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                {/* Avatar */}
-                                <div style={{
-                                    width: '34px', height: '34px', borderRadius: '50%',
-                                    background: 'linear-gradient(135deg, #C4956A, #D4A574)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                    color: '#fff', fontFamily: 'var(--font-playfair), serif', fontWeight: 700, fontSize: '0.85rem',
-                                    boxShadow: '0 0 12px rgba(196,149,106,0.35)',
-                                }}>A</div>
-                            </div>
-                        </div>
-                        {/* Gradient accent line */}
-                        <div className="admin-header-line" />
-                    </header>
+                            {/* Gradient accent line */}
+                            <div className="admin-header-line" />
+                        </header>
 
-                    <main className="admin-main" style={{ flex: 1 }}>
-                        {children}
-                    </main>
+                        <main className="admin-main" style={{ flex: 1 }}>
+                            {children}
+                        </main>
+                    </div>
                 </div>
-            </div>
-        </SocketProvider>
+            </SocketProvider>
+        </SWRProvider >
     );
 }

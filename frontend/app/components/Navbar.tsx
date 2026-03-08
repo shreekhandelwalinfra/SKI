@@ -6,9 +6,8 @@ import { useRouter } from 'next/navigation';
 import { useTheme } from './ThemeProvider';
 
 const navLinks = [
-    { href: '/properties?category=residential-land', label: 'Residences' },
-    { href: '/properties?category=commercial-land', label: 'Estates' },
-    { href: '/properties', label: 'Urban Luxury' },
+    { href: '/', label: 'Home' },
+    // { href: '/properties?category=commercial-land', label: 'Estates' },
     { href: '/earning-plan', label: 'Earning Plan' },
     { href: '/about', label: 'About' },
     { href: '/contact', label: 'Contact' },

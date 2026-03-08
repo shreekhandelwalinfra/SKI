@@ -72,7 +72,7 @@ export default function Hero() {
                         gap: '12px', flexWrap: 'wrap',
                         opacity: 0, animationDelay: '0.55s',
                     }}>
-                        <Link href="/properties" style={{
+                        <Link href="/user/signup" style={{
                             display: 'inline-block', padding: '12px 28px', borderRadius: '50px',
                             background: 'linear-gradient(135deg, #C4956A, #a87a50)',
                             color: '#fff', fontSize: 'clamp(0.65rem, 1.8vw, 0.75rem)', fontWeight: 700,
@@ -80,7 +80,7 @@ export default function Hero() {
                             fontFamily: 'var(--font-inter), sans-serif', textDecoration: 'none',
                             boxShadow: '0 4px 20px rgba(196,149,106,0.3)',
                         }}>
-                            View Properties
+                            Get Started
                         </Link>
                         <Link href="/earning-plan" style={{
                             display: 'inline-block', padding: '12px 28px', borderRadius: '50px',
@@ -102,7 +102,7 @@ export default function Hero() {
                         {[
                             { val: '500+', label: 'Properties' },
                             { val: '15+', label: 'Years' },
-                            { val: '₹500Cr+', label: 'Volume' },
+                            { val: '₹500Cr+', label: 'Team Business' },
                         ].map((s, i) => (
                             <div key={i} style={{ textAlign: 'center', minWidth: '70px' }}>
                                 <div style={{ fontSize: 'clamp(1.1rem, 3vw, 1.5rem)', fontWeight: 700, color: '#C4956A', fontFamily: 'var(--font-playfair)', marginBottom: '2px' }}>{s.val}</div>

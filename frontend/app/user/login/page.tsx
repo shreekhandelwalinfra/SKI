@@ -83,7 +83,7 @@ export default function UserLoginPage() {
                     </div>
 
                     <div className="section-label">Member Login</div>
-                    <h1 className="heading-serif" style={{ fontSize: '1.75rem', color: 'var(--text-heading)', marginBottom: '0.25rem' }}>Sign In</h1>
+                    <h1 className="heading-serif" style={{ fontSize: '1.75rem', color: 'var(--text-heading)', marginBottom: '0.25rem' }}>Login</h1>
                     <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '2rem', fontFamily: 'var(--font-inter), sans-serif' }}>Access your SKI investment account</p>
 
                     {error && (
@@ -100,7 +100,7 @@ export default function UserLoginPage() {
                             <input type="password" value={password} onChange={e => setPassword(e.target.value)} className="input" required />
                         </div>
                         <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', borderRadius: '6px', opacity: loading ? 0.7 : 1 }}>
-                            {loading ? 'Signing in...' : 'Sign In'}
+                            {loading ? 'Logging in...' : 'Login'}
                         </button>
                     </form>
 

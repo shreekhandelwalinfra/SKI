@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { getUsers, activateUser, blockUser, addUser } from '../lib/api';
-import useSWR from 'swr';
+import useSWR, { useSWRConfig } from 'swr';
 import { useSocket } from '../../../lib/SocketContext';
 
 interface UserItem {
@@ -39,10 +39,30 @@ export default function ActivationPage() {
     );
     const users: UserItem[] = usersData || [];
 
+    const { mutate: globalMutate } = useSWRConfig();
+
+    const refreshAllTabs = async () => {
+        console.log('[Socket] user:updated received. Aggressively busting all SWR caches...');
+
+        // Aggressively match ANY key that starts with admin_activation and force revalidation
+        await globalMutate(
+            (key: any) => Array.isArray(key) && key[0] === 'admin_activation',
+            undefined, // Do NOT set data, just mark stale
+            { revalidate: true } // Force immediate refetch
+        );
+
+        // Backup plan: Absolute guarantee that the CURRENTLY VIEWED tab re-fetches its data immediately
+        await loadUsers(undefined, { revalidate: true });
+    };
+
     useEffect(() => {
-        socket.on('investment:updated', loadUsers);
-        return () => { socket.off('investment:updated', loadUsers); };
-    }, [socket, loadUsers]);
+        socket.on('user:updated', refreshAllTabs);
+        socket.on('investment:updated', refreshAllTabs); // Investment impacts business amounts
+        return () => {
+            socket.off('user:updated', refreshAllTabs);
+            socket.off('investment:updated', refreshAllTabs);
+        };
+    }, [socket, globalMutate, loadUsers]);
 
     const handleConfirm = async () => {
         if (!confirmModal) return;
@@ -50,7 +70,7 @@ export default function ActivationPage() {
         try {
             if (confirmModal.action === 'activate') await activateUser(confirmModal.id);
             else await blockUser(confirmModal.id);
-            await loadUsers();
+            refreshAllTabs(); // Instantly update all SWR caches, not just the active tab
         } catch (err) {
             console.error(err);
         } finally {
@@ -66,7 +86,7 @@ export default function ActivationPage() {
             await addUser({ ...formData, status: 'pending' });
             setShowAddModal(false);
             setFormData({ name: '', email: '', phone: '', password: '' });
-            loadUsers();
+            refreshAllTabs();
         } catch (err: any) {
             setFormError(err.message);
         }

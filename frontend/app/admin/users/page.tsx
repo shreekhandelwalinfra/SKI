@@ -11,14 +11,19 @@ interface UserItem {
     email: string;
     phone: string;
     uniqueId: string;
+    referralCode?: string;
     status: string;
     isBlocked: boolean;
+    rank?: number;
     selfReward: number;
     directBonus: number;
     teamBonus: number;
     totalBusiness: number;
     selfInvestment?: number;
     createdAt: string;
+    activatedAt?: string;
+    referredBy?: { name: string; uniqueId: string } | null;
+    teamLead?: { name: string; uniqueId: string } | null;
 }
 
 const TreeNode = ({ n, level = 0, onEdit, onBlock, onDelete }: { n: any, level?: number, onEdit: (u: any) => void, onBlock: (id: string) => void, onDelete: (id: string) => void }) => {
@@ -178,6 +183,9 @@ export default function UsersPage() {
     const [editUser, setEditUser] = useState<UserItem | null>(null);
     const [editForm, setEditForm] = useState<any>({});
     const [editSaving, setEditSaving] = useState(false);
+
+    // View Details Modal
+    const [detailUser, setDetailUser] = useState<UserItem | null>(null);
 
     // SWR Fetcher
     const fetchUsers = async () => {
@@ -457,7 +465,16 @@ export default function UsersPage() {
                                 </div>
 
                                 {/* Action bar (bottom) */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr 1fr 1fr', borderTop: '1px solid rgba(255,255,255,0.04)' }}>
+                                    {/* View Details */}
+                                    <button onClick={() => setDetailUser(user)} style={{
+                                        padding: '0.7rem 0', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
+                                        background: 'transparent', color: '#a78bfa', fontSize: '0.6rem', fontWeight: 600, letterSpacing: '0.05em', textTransform: 'uppercase',
+                                        fontFamily: 'var(--font-inter), sans-serif', transition: 'background 0.2s',
+                                    }} onMouseOver={e => e.currentTarget.style.background = 'rgba(167,139,250,0.06)'} onMouseOut={e => e.currentTarget.style.background = 'transparent'}>
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="8" x2="12" y2="12" /><line x1="12" y1="16" x2="12.01" y2="16" /></svg>
+                                        Info
+                                    </button>
                                     {/* View Tree */}
                                     <button onClick={() => handleViewTree(user)} style={{
                                         padding: '0.7rem 0', border: 'none', cursor: 'pointer', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px',
@@ -504,6 +521,112 @@ export default function UsersPage() {
                     })}
                 </div>
             )}
+
+            {/* ───── View Details Modal ───── */}
+            {detailUser && (() => {
+                const du = detailUser;
+                const uid = (du.id || du._id) as string;
+                const sc = statusColor(du.status);
+                const fmt2 = (n: number) => `₹${(n || 0).toLocaleString('en-IN')}`;
+                const InfoRow = ({ label, value, mono }: { label: string; value: string; mono?: boolean }) => (
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.6rem 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                        <span style={{ fontSize: '0.72rem', color: '#8A8A96', fontFamily: 'var(--font-inter), sans-serif', fontWeight: 500 }}>{label}</span>
+                        <span style={{ fontSize: '0.8rem', color: mono ? '#C4956A' : '#F5F0EB', fontFamily: mono ? 'monospace' : 'var(--font-inter)', fontWeight: 500, maxWidth: '60%', textAlign: 'right', wordBreak: 'break-all' }}>{value || '—'}</span>
+                    </div>
+                );
+                return (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(5,5,10,0.88)', backdropFilter: 'blur(16px)' }}>
+                        <div style={{
+                            width: '100%', maxWidth: '560px', maxHeight: '92vh', borderRadius: '18px', overflow: 'hidden',
+                            background: 'linear-gradient(160deg, rgba(20,25,32,0.99), rgba(15,19,24,0.99))',
+                            border: '1px solid rgba(196,149,106,0.15)',
+                            boxShadow: '0 25px 60px rgba(0,0,0,0.6)',
+                            display: 'flex', flexDirection: 'column' as const,
+                        }}>
+                            <div style={{ height: '2px', background: 'linear-gradient(90deg, #a78bfa, #C4956A, rgba(196,149,106,0.1))' }} />
+
+                            {/* Header */}
+                            <div style={{ padding: '1.5rem 1.75rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.04)', flexShrink: 0 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem' }}>
+                                        <div style={{ width: '46px', height: '46px', borderRadius: '50%', background: 'linear-gradient(135deg, #C4956A, #A67B54)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontFamily: 'var(--font-playfair), Georgia, serif', fontWeight: 700, fontSize: '1.1rem', boxShadow: '0 3px 10px rgba(196,149,106,0.35)', flexShrink: 0 }}>{du.name?.charAt(0)?.toUpperCase()}</div>
+                                        <div>
+                                            <h2 style={{ color: '#F5F0EB', fontWeight: 700, fontSize: '1.2rem', fontFamily: 'var(--font-playfair), Georgia, serif', letterSpacing: '0.02em', margin: 0 }}>{du.name}</h2>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginTop: '4px' }}>
+                                                <span style={{ fontFamily: 'monospace', fontSize: '0.72rem', color: '#C4956A', background: 'rgba(196,149,106,0.08)', padding: '2px 8px', borderRadius: '4px', border: '1px solid rgba(196,149,106,0.15)' }}>{du.uniqueId}</span>
+                                                <span style={{ fontSize: '0.57rem', padding: '2px 8px', borderRadius: '20px', background: sc.bg, color: sc.text, border: `1px solid ${sc.border}`, textTransform: 'uppercase' as const, letterSpacing: '0.08em', fontWeight: 600 }}>{du.status}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setDetailUser(null)} style={{ width: '34px', height: '34px', borderRadius: '50%', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#8A8A96', transition: 'all 0.2s', flexShrink: 0 }}
+                                        onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.color = '#fff'; }}
+                                        onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#8A8A96'; }}
+                                    ><svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M1 13L13 1M1 1L13 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" /></svg></button>
+                                </div>
+                            </div>
+
+                            {/* Scrollable body */}
+                            <div style={{ flex: 1, overflowY: 'auto', padding: '1.25rem 1.75rem 2rem' }} className="custom-scrollbar">
+
+                                {/* Contact info */}
+                                <div style={{ fontSize: '0.55rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>Contact Information</div>
+                                <div style={{ background: 'rgba(10,10,15,0.4)', borderRadius: '12px', padding: '0 1rem', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                    <InfoRow label="Email" value={du.email} />
+                                    <InfoRow label="Phone" value={du.phone || '—'} />
+                                </div>
+
+                                {/* Account info */}
+                                <div style={{ fontSize: '0.55rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>Account Details</div>
+                                <div style={{ background: 'rgba(10,10,15,0.4)', borderRadius: '12px', padding: '0 1rem', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                    <InfoRow label="Member ID" value={du.uniqueId} mono />
+                                    <InfoRow label="Referral Code" value={du.referralCode || '—'} mono />
+                                    <InfoRow label="Rank" value={du.rank && du.rank > 0 ? `Level ${du.rank}` : 'Unranked'} />
+                                    <InfoRow label="Blocked" value={du.isBlocked ? 'Yes' : 'No'} />
+                                    <InfoRow label="Registered" value={new Date(du.createdAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })} />
+                                    <InfoRow label="Activated" value={du.activatedAt ? new Date(du.activatedAt).toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Not yet'} />
+                                </div>
+
+                                {/* Referral network */}
+                                <div style={{ fontSize: '0.55rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>Referral Network</div>
+                                <div style={{ background: 'rgba(10,10,15,0.4)', borderRadius: '12px', padding: '0 1rem', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                    <InfoRow label="Referred By" value={du.referredBy ? `${du.referredBy.name} (${du.referredBy.uniqueId})` : 'Direct / Admin'} />
+                                    <InfoRow label="Team Lead" value={du.teamLead ? `${du.teamLead.name} (${du.teamLead.uniqueId})` : '—'} />
+                                </div>
+
+                                {/* Financial summary */}
+                                <div style={{ fontSize: '0.55rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>Financial Summary</div>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem', marginBottom: '1.25rem' }}>
+                                    {[
+                                        { label: 'Self Investment', value: fmt2(du.selfInvestment || 0), color: '#6ee7b7', accent: 'rgba(52,211,153,0.07)' },
+                                        { label: 'Team Volume', value: fmt2(du.totalBusiness), color: '#93c5fd', accent: 'rgba(96,165,250,0.07)' },
+                                        { label: 'Self Reward', value: fmt2(du.selfReward), color: '#fbbf24', accent: 'rgba(251,191,36,0.07)' },
+                                        { label: 'Direct Bonus', value: fmt2(du.directBonus), color: '#f472b6', accent: 'rgba(244,114,182,0.07)' },
+                                        { label: 'Team Bonus', value: fmt2(du.teamBonus), color: '#a78bfa', accent: 'rgba(167,139,250,0.07)' },
+                                        { label: 'Total Earnings', value: fmt2((du.selfReward || 0) + (du.directBonus || 0) + (du.teamBonus || 0)), color: '#C4956A', accent: 'rgba(196,149,106,0.07)' },
+                                    ].map(s => (
+                                        <div key={s.label} style={{ background: s.accent, borderRadius: '10px', padding: '0.75rem 1rem', border: `1px solid ${s.color}22` }}>
+                                            <div style={{ fontSize: '0.55rem', color: '#8A8A96', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '4px', fontFamily: 'var(--font-inter), sans-serif' }}>{s.label}</div>
+                                            <div style={{ color: s.color, fontWeight: 700, fontSize: '1rem', fontFamily: 'var(--font-inter), sans-serif' }}>{s.value}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Quick actions */}
+                                <div style={{ display: 'flex', gap: '0.75rem' }}>
+                                    <button onClick={() => { setDetailUser(null); openEditModal(du); }} style={{ flex: 1, padding: '0.65rem', borderRadius: '10px', border: '1px solid rgba(250,204,21,0.2)', background: 'rgba(250,204,21,0.07)', color: '#facc15', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'var(--font-inter), sans-serif', transition: 'all 0.2s' }}
+                                        onMouseOver={e => e.currentTarget.style.background = 'rgba(250,204,21,0.14)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(250,204,21,0.07)'}>
+                                        ✏️ Edit Balances
+                                    </button>
+                                    <button onClick={() => { setDetailUser(null); handleViewTree(du); }} style={{ flex: 1, padding: '0.65rem', borderRadius: '10px', border: '1px solid rgba(56,189,248,0.2)', background: 'rgba(56,189,248,0.07)', color: '#38bdf8', cursor: 'pointer', fontWeight: 600, fontSize: '0.78rem', fontFamily: 'var(--font-inter), sans-serif', transition: 'all 0.2s' }}
+                                        onMouseOver={e => e.currentTarget.style.background = 'rgba(56,189,248,0.14)'} onMouseOut={e => e.currentTarget.style.background = 'rgba(56,189,248,0.07)'}>
+                                        🌳 View Tree
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                );
+            })()}
 
             {/* Tree Modal */}
             {treeUser && (

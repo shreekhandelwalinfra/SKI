@@ -39,6 +39,7 @@ function OtpPanel({ email, redirectUrl }: { email: string; redirectUrl: string }
         setError(''); setLoading(true);
         try {
             const res = await verifyEmailOTP(email, code);
+            if (res.token) localStorage.setItem('ski-token', res.token);
             localStorage.setItem('user-data', JSON.stringify(res.data));
             window.dispatchEvent(new Event('ski-auth-change'));
             router.push(redirectUrl);
@@ -123,6 +124,7 @@ function UserLoginForm() {
         setLoading(true);
         try {
             const res = await userLogin(email, password);
+            if (res.token) localStorage.setItem('ski-token', res.token);
             localStorage.setItem('user-data', JSON.stringify(res.data));
             window.dispatchEvent(new Event('ski-auth-change'));
             router.push(redirectUrl);

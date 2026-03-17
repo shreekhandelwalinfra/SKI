@@ -31,7 +31,7 @@ export default function AdminLoginPage() {
         try {
             const res = await adminLogin(email, password);
             if (res.data?.role !== 'admin') { setError('Access denied. Admin only.'); setLoading(false); return; }
-            // token is automatically saved in an HttpOnly cookie
+            if (res.token) localStorage.setItem('ski-admin-token', res.token);
             localStorage.setItem('admin-user', JSON.stringify(res.data));
             router.push('/admin/dashboard');
         } catch (err: any) { setError(err.message || 'Login failed'); } finally { setLoading(false); }

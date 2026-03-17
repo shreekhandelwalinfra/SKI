@@ -1,6 +1,12 @@
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
-// ─── Core API helper (with credentials for auth cookie) ──
+// ─── Core API helper (Bearer token auth for cross-domain) ──
+
+function getAuthHeaders(): Record<string, string> {
+    if (typeof window === 'undefined') return {};
+    const token = localStorage.getItem('ski-admin-token');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+}
 
 async function apiCall(path: string, options: RequestInit = {}) {
     const res = await fetch(`${API_BASE}${path}`, {
@@ -8,6 +14,7 @@ async function apiCall(path: string, options: RequestInit = {}) {
         credentials: 'include',
         headers: {
             'Content-Type': 'application/json',
+            ...getAuthHeaders(),
             ...options.headers,
         },
     });

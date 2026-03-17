@@ -26,6 +26,7 @@ const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
 
     res.status(statusCode).cookie('token', token, options).json({
         status: 'success',
+        token, // also returned in body for cross-domain Bearer token auth
         data: {
             _id: user.id,
             name: user.name,

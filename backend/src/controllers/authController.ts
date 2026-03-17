@@ -16,11 +16,12 @@ const generateToken = (id: string): string => {
 const sendTokenResponse = (user: any, statusCode: number, res: Response) => {
     const token = generateToken(user.id);
 
+    const isProd = process.env.NODE_ENV === 'production';
     const options = {
         expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax' as const,
+        secure: isProd, // Must be true when sameSite is 'none'
+        sameSite: (isProd ? 'none' : 'lax') as 'none' | 'lax' | 'strict',
     };
 
     res.status(statusCode).cookie('token', token, options).json({

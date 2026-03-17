@@ -24,6 +24,15 @@ interface UserItem {
     activatedAt?: string;
     referredBy?: { name: string; uniqueId: string } | null;
     teamLead?: { name: string; uniqueId: string } | null;
+
+    // KYC / Personal
+    dateOfBirth?: string;
+    aadharNumber?: string;
+    panNumber?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
 }
 
 const TreeNode = ({ n, level = 0, onEdit, onBlock, onDelete }: { n: any, level?: number, onEdit: (u: any) => void, onBlock: (id: string) => void, onDelete: (id: string) => void }) => {
@@ -573,6 +582,15 @@ export default function UsersPage() {
                                 <div style={{ background: 'rgba(10,10,15,0.4)', borderRadius: '12px', padding: '0 1rem', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.04)' }}>
                                     <InfoRow label="Email" value={du.email} />
                                     <InfoRow label="Phone" value={du.phone || '—'} />
+                                </div>
+
+                                {/* Personal & KYC info */}
+                                <div style={{ fontSize: '0.55rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '0.5rem', fontFamily: 'var(--font-inter), sans-serif' }}>Personal & KYC Details</div>
+                                <div style={{ background: 'rgba(10,10,15,0.4)', borderRadius: '12px', padding: '0 1rem', marginBottom: '1.25rem', border: '1px solid rgba(255,255,255,0.04)' }}>
+                                    <InfoRow label="Date of Birth" value={du.dateOfBirth || '—'} />
+                                    <InfoRow label="Aadhaar No." value={du.aadharNumber || '—'} mono />
+                                    <InfoRow label="PAN No." value={du.panNumber || '—'} mono />
+                                    <InfoRow label="Address" value={du.address ? `${du.address}, ${du.city}, ${du.state} - ${du.pincode}`.replace(/^[,\s]+|[,\s]+$/g, '') : '—'} />
                                 </div>
 
                                 {/* Account info */}

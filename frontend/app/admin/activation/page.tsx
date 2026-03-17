@@ -24,6 +24,15 @@ interface UserItem {
     activatedAt?: string;
     referredBy?: { name: string; uniqueId: string } | null;
     teamLead?: { name: string; uniqueId: string } | null;
+
+    // KYC / Personal
+    dateOfBirth?: string;
+    aadharNumber?: string;
+    panNumber?: string;
+    address?: string;
+    city?: string;
+    state?: string;
+    pincode?: string;
 }
 
 export default function ActivationPage() {
@@ -229,6 +238,26 @@ export default function ActivationPage() {
                                                     <div style={{ fontSize: '0.8rem', color: '#C0B8AE', wordBreak: 'break-all' }}>{f.value}</div>
                                                 </div>
                                             ))}
+                                        </div>
+
+                                        {/* ── Section: Personal & KYC Details ── */}
+                                        <div style={{ fontSize: '0.52rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '8px' }}>Personal & KYC Details</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                                            {[
+                                                { label: 'Date of Birth', value: user.dateOfBirth || '—' },
+                                                { label: 'Aadhaar No.', value: user.aadharNumber || '—', mono: true },
+                                                { label: 'PAN No.', value: user.panNumber || '—', mono: true },
+                                                { label: 'Location', value: user.address ? `${user.city || '—'}, ${user.state || '—'} - ${user.pincode || '—'}` : '—' },
+                                            ].map(f => (
+                                                <div key={f.label} style={{ background: '#1A1A26', borderRadius: '8px', padding: '10px 12px', border: '1px solid #22222E' }}>
+                                                    <div style={{ fontSize: '0.55rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '3px' }}>{f.label}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: (f as any).mono ? '#C4956A' : '#C0B8AE', fontFamily: (f as any).mono ? 'monospace' : 'inherit' }}>{f.value}</div>
+                                                </div>
+                                            ))}
+                                            <div style={{ gridColumn: '1 / -1', background: '#1A1A26', borderRadius: '8px', padding: '10px 12px', border: '1px solid #22222E' }}>
+                                                <div style={{ fontSize: '0.55rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '3px' }}>Full Address</div>
+                                                <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{user.address || '—'}</div>
+                                            </div>
                                         </div>
 
                                         {/* ── Section: Account Details ── */}

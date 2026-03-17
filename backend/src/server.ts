@@ -23,6 +23,9 @@ dotenv.config();
 const app: Application = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust the reverse proxy (Render) to correctly set secure cookies over HTTPS
+app.set('trust proxy', 1);
+
 // Create HTTP server + attach Socket.io
 const httpServer = createServer(app);
 initSocket(httpServer);

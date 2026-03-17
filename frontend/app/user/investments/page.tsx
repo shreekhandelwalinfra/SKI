@@ -7,6 +7,7 @@ import { useSocket } from '../../../lib/SocketContext';
 
 export default function InvestmentsPage() {
     const [showForm, setShowForm] = useState(false);
+    const [isApproved, setIsApproved] = useState(false);
     const [formCategory, setFormCategory] = useState<'existing' | 'new'>('new');
     const [form, setForm] = useState({
         propertyDealId: '', propertyName: '', unitNumber: '', plotAreaSize: '', propertyValue: '',
@@ -16,6 +17,16 @@ export default function InvestmentsPage() {
     const [success, setSuccess] = useState('');
     const [error, setError] = useState('');
     const { socket } = useSocket();
+
+    useEffect(() => {
+        try {
+            const stored = localStorage.getItem('user-data');
+            if (stored) {
+                const u = JSON.parse(stored);
+                if (u.status?.toLowerCase() === 'active') setIsApproved(true);
+            }
+        } catch { }
+    }, []);
 
     const fetchInvestments = async () => {
         const res = await getUserInvestments();
@@ -90,7 +101,17 @@ export default function InvestmentsPage() {
                     <div className="section-label" style={{ fontSize: '0.65rem' }}>Portfolio</div>
                     <h2 className="heading-serif" style={{ fontSize: '1.25rem', color: 'var(--text-heading)' }}>Property Investments</h2>
                 </div>
-                <button onClick={() => setShowForm(!showForm)} className="btn btn-primary" style={{ borderRadius: '6px', fontSize: '0.75rem' }}>
+                <button
+                    onClick={() => isApproved && setShowForm(!showForm)}
+                    className="btn btn-primary"
+                    style={{
+                        borderRadius: '6px',
+                        fontSize: '0.75rem',
+                        opacity: isApproved ? 1 : 0.5,
+                        cursor: isApproved ? 'pointer' : 'not-allowed'
+                    }}
+                    title={isApproved ? "" : "Your account is pending admin approval"}
+                >
                     {showForm ? 'Cancel' : '+ New Investment'}
                 </button>
             </div>

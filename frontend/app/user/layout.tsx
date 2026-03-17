@@ -35,6 +35,9 @@ export default function UserLayout({ children }: { children: ReactNode }) {
 
     // Fetch fresh user data from API
     const refreshUserData = useCallback(async () => {
+        // Do not fetch /auth/me on login or signup pages as it will unnecessarily return 401
+        if (pathname === '/user/login' || pathname === '/user/signup') return;
+
         try {
             // The browser will automatically send the HttpOnly cookie
             const res = await fetch(`${API_BASE}/auth/me`, {

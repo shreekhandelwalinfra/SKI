@@ -25,6 +25,13 @@ model User {
   status      UserStatus @default(PENDING)
   isBlocked   Boolean  @default(false)
 
+  // Email verification
+  isEmailVerified     Boolean   @default(false)
+  emailOTP            String?   // 6-digit OTP (stored as string, cleared after use)
+  emailOTPExpiresAt   DateTime? // Expires 10 minutes after generation
+  emailOTPSentAt      DateTime? // Used to enforce 60-second cooldown on resend
+  emailOTPAttempts    Int       @default(0) // Max 3 OTP sends per email per session
+
   // Profile details
   address     String   @default("")
   city        String   @default("")
@@ -65,6 +72,8 @@ model User {
   bankDetail      BankDetail?
   propertyDeals   PropertyDeal[]
   rewards         Reward[]
+  notifications   Notification[]
+  adminLogs       AdminLog[]     @relation("AdminActionLogs")
 
   @@index([status])
   @@index([role])
@@ -124,11 +133,13 @@ model PropertyDeal {
   user            User       @relation(fields: [userId], references: [id])
   propertyName    String
   propertyType    String     @default("")
+  unitNumber      String     @default("")
   totalDealAmount Float
   status          DealStatus @default(ACTIVE)
   createdAt       DateTime   @default(now())
   updatedAt       DateTime   @updatedAt
   installments    Installment[]
+  investments     Investment[]
 
   @@index([userId])
   @@index([status])
@@ -287,6 +298,9 @@ model Investment {
 
   // Property details
   propertyName    String           @default("")      // e.g. "Green Valley Residency"
+  unitNumber      String           @default("")      // Plot/Flat number
+  propertyDealId  String?                            // Link to existing deal if user selected it
+  propertyDeal    PropertyDeal?    @relation(fields: [propertyDealId], references: [id])
   plotAreaSize    String           @default("")      // e.g. "1200 sqft", "150 sqyd"
   propertyValue   Float            @default(0)       // Total property value
   propertyAddress String           @default("")      // Full property address
@@ -387,4 +401,39 @@ enum TicketStatus {
   OPEN
   IN_PROGRESS
   RESOLVED
+}
+
+// ─── NOTIFICATIONS ───────────────────────────────────────
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String?              // null = notification for ADMIN
+  user      User?    @relation(fields: [userId], references: [id])
+  type      String               // SYSTEM, INVESTMENT, PROFIT, SUPPORT
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  link      String?              // Optional deep-link path e.g. /user/investments
+  createdAt DateTime @default(now())
+
+  @@index([userId, isRead])
+  @@index([createdAt])
+}
+
+// ─── ADMIN AUDIT LOG ─────────────────────────────────────
+
+model AdminLog {
+  id         String   @id @default(cuid())
+  adminId    String
+  admin      User     @relation("AdminActionLogs", fields: [adminId], references: [id])
+  action     String               // e.g. APPROVE_INVESTMENT, ACTIVATE_USER, EDIT_BALANCE
+  targetId   String?              // The affected user/investment/deal ID
+  targetName String?              // Human-readable label e.g. "Rahul Sharma"
+  details    String   @default("") // JSON payload of exact changes
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  @@index([adminId])
+  @@index([action])
+  @@index([createdAt])
 }

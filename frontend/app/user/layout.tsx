@@ -7,6 +7,8 @@ import { useTheme } from '../components/ThemeProvider';
 import { SocketProvider, useSocket } from '../../lib/SocketContext';
 import { SWRProvider } from '../../lib/SWRProvider';
 import { mutate } from 'swr';
+import NotificationBell from '../../components/NotificationBell';
+import { getUserNotifications, markUserNotificationsRead, markUserNotificationRead } from './lib/api';
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
 
@@ -28,14 +30,16 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     const [mounted, setMounted] = useState(false);
     const [userName, setUserName] = useState('');
     const [userUniqueId, setUserUniqueId] = useState('');
+    const [userId, setUserId] = useState('');
     const [userStatus, setUserStatus] = useState('');
 
     // Fetch fresh user data from API
     const refreshUserData = useCallback(async () => {
         try {
-            const token = localStorage.getItem('user-token');
-            if (!token) return;
-            const res = await fetch(`${API_BASE}/auth/me`, { headers: { Authorization: `Bearer ${token}` } });
+            // The browser will automatically send the HttpOnly cookie
+            const res = await fetch(`${API_BASE}/auth/me`, {
+                credentials: 'include'
+            });
             if (!res.ok) return;
             const json = await res.json();
             const u = json.data;
@@ -62,6 +66,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                 const u = JSON.parse(stored);
                 setUserName(u.name || '');
                 setUserUniqueId(u.uniqueId || '');
+                setUserId(u.id || '');
                 setUserStatus(u.status || '');
             }
         } catch { }
@@ -69,11 +74,11 @@ export default function UserLayout({ children }: { children: ReactNode }) {
         refreshUserData();
     }, [refreshUserData]);
 
-    // Route protection — redirect to login if no token (runs on navigation)
+    // Route protection — redirect to login if no stored user data
     useEffect(() => {
         if (pathname !== '/user/login' && pathname !== '/user/signup') {
-            const token = localStorage.getItem('user-token');
-            if (!token) router.push('/user/login');
+            const hasUserData = localStorage.getItem('user-data');
+            if (!hasUserData) router.push('/user/login');
         }
     }, [pathname, router]);
 
@@ -83,8 +88,10 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     if (!mounted) return null;
     if (pathname === '/user/login' || pathname === '/user/signup') return <>{children}</>;
 
-    const handleLogout = () => {
-        localStorage.removeItem('user-token');
+    const handleLogout = async () => {
+        try {
+            await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
+        } catch (e) { console.error('Logout failed', e); }
         localStorage.removeItem('user-data');
         mutate(() => true, undefined, { revalidate: false }); // Wipe SWR cache
         router.push('/user/login');
@@ -201,6 +208,13 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                                 </div>
                             </div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                                <NotificationBell
+                                    fetchNotifications={getUserNotifications}
+                                    markAllRead={markUserNotificationsRead}
+                                    markOneRead={markUserNotificationRead}
+                                    socketEvent="notification:new"
+                                    filterByUserId={userId || ''}
+                                />
                                 <button onClick={toggleTheme} style={{ padding: '0.5rem', border: 'none', cursor: 'pointer', background: 'transparent', color: 'var(--text-muted)', borderRadius: '50%', transition: 'color 0.2s' }}>
                                     {theme === 'dark' ? (
                                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>

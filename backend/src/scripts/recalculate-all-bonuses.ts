@@ -15,7 +15,7 @@
  *   5. Recalculate every user's aggregate directBonus and teamBonus totals
  */
 
-import prisma from './config/database';
+import prisma from '../config/database';
 
 // ─── RANK HELPERS ────────────────────────────────────────────
 

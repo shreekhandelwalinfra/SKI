@@ -18,8 +18,13 @@ export default function UserDashboardPage() {
 
     // Real-time: refresh dashboard when investments change
     useEffect(() => {
-        socket.on('investment:updated', loadData);
-        return () => { socket.off('investment:updated', loadData); };
+        const handleUpdate = () => loadData();
+        socket.on('investment:updated', handleUpdate);
+        socket.on('profit:updated', handleUpdate);
+        return () => {
+            socket.off('investment:updated', handleUpdate);
+            socket.off('profit:updated', handleUpdate);
+        };
     }, [socket, loadData]);
 
     const copyText = (text: string, key: string) => { navigator.clipboard.writeText(text); setCopied(key); setTimeout(() => setCopied(''), 2000); };

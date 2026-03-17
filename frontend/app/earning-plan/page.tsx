@@ -29,9 +29,8 @@ export default function EarningPlanPage() {
     useEffect(() => {
         setMounted(true);
         try {
-            const token = localStorage.getItem('user-token');
             const stored = localStorage.getItem('user-data');
-            if (token && stored) {
+            if (stored) {
                 setIsLoggedIn(true);
                 const u = JSON.parse(stored);
                 const status = (u.status || '').toLowerCase();
@@ -232,7 +231,7 @@ export default function EarningPlanPage() {
                                     </p>
                                     <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
                                         <Link
-                                            href="/user/login"
+                                            href="/user/login?redirect=/earning-plan"
                                             style={{
                                                 display: 'inline-block', padding: '14px 36px', borderRadius: '12px',
                                                 background: 'linear-gradient(135deg, #C4956A, #a87a50)',
@@ -245,7 +244,7 @@ export default function EarningPlanPage() {
                                             Login
                                         </Link>
                                         <Link
-                                            href="/user/signup"
+                                            href="/user/signup?redirect=/earning-plan"
                                             style={{
                                                 display: 'inline-block', padding: '14px 36px', borderRadius: '12px',
                                                 background: 'transparent',

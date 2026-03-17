@@ -20,8 +20,13 @@ export default function ProfitSummaryPage() {
     const directData = data?.direct || [];
 
     useEffect(() => {
-        socket.on('investment:updated', loadAll);
-        return () => { socket.off('investment:updated', loadAll); };
+        const handleUpdate = () => loadAll();
+        socket.on('investment:updated', handleUpdate);
+        socket.on('profit:updated', handleUpdate);
+        return () => {
+            socket.off('investment:updated', handleUpdate);
+            socket.off('profit:updated', handleUpdate);
+        };
     }, [socket, loadAll]);
 
     const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });

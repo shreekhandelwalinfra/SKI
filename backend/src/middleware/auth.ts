@@ -11,7 +11,9 @@ export const protect = async (req: AuthRequest, res: Response, next: NextFunctio
     try {
         let token: string | undefined;
 
-        if (req.headers.authorization?.startsWith('Bearer')) {
+        if (req.cookies && req.cookies.token) {
+            token = req.cookies.token;
+        } else if (req.headers.authorization?.startsWith('Bearer')) {
             token = req.headers.authorization.split(' ')[1];
         }
 

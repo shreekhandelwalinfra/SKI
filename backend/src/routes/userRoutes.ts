@@ -1,13 +1,14 @@
 import { Router } from 'express';
-import {
-    getUserDashboard, getMyTeam,
-    getUserInvestments, createInvestment,
-    getUserPropertyDeals, getUserRewards,
-    getUserTickets, createTicket, replyToTicket, markTicketSeenByUser,
-    getSelfReward, getTeamBonusProfit, getDirectBonusProfit,
-    getProfile, updateProfile, changeUserPassword, updateBankDetails,
-} from '../controllers/userController';
 import { protect, requireActive } from '../middleware/auth';
+
+// ─── Domain Controllers ──────────────────────────────────
+import { getUserDashboard } from '../controllers/user/dashboardController';
+import { getMyTeam } from '../controllers/user/teamController';
+import { getUserInvestments, createInvestment, getUserPropertyDeals, getUserRewards } from '../controllers/user/investmentController';
+import { getUserTickets, createTicket, replyToTicket, markTicketSeenByUser } from '../controllers/user/supportController';
+import { getSelfReward, getTeamBonusProfit, getDirectBonusProfit } from '../controllers/user/profitController';
+import { getProfile, updateProfile, changeUserPassword, updateBankDetails } from '../controllers/user/profileController';
+import { getNotifications, markNotificationsRead, markNotificationRead } from '../controllers/user/notificationController';
 
 const router = Router();
 
@@ -36,5 +37,10 @@ router.post('/investments', requireActive, createInvestment);
 router.post('/support', requireActive, createTicket);
 router.post('/support/:id/reply', requireActive, replyToTicket);
 router.put('/support/:id/seen', requireActive, markTicketSeenByUser);
+
+// ─── NOTIFICATIONS ───────────────────────────────────────
+router.get('/notifications', getNotifications);
+router.put('/notifications/read', markNotificationsRead);
+router.put('/notifications/:id/read', markNotificationRead);
 
 export default router;

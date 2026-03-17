@@ -1,14 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { getUserInvestments, createUserInvestment } from '../lib/api';
+import { getUserInvestments, createUserInvestment, getUserPropertyDeals } from '../lib/api';
 import useSWR from 'swr';
 import { useSocket } from '../../../lib/SocketContext';
 
 export default function InvestmentsPage() {
     const [showForm, setShowForm] = useState(false);
+    const [formCategory, setFormCategory] = useState<'existing' | 'new'>('new');
     const [form, setForm] = useState({
-        propertyName: '', plotAreaSize: '', propertyValue: '',
+        propertyDealId: '', propertyName: '', unitNumber: '', plotAreaSize: '', propertyValue: '',
         propertyAddress: '', amount: '', installmentNo: '1', isFinal: false,
     });
     const [submitting, setSubmitting] = useState(false);
@@ -24,10 +25,23 @@ export default function InvestmentsPage() {
     const { data: investmentsData, isLoading: loading, mutate: loadInvestments } = useSWR('user_investments', fetchInvestments);
     const investments = investmentsData || [];
 
+    const fetchDeals = async () => {
+        const res = await getUserPropertyDeals();
+        return res.data;
+    };
+    const { data: dealsData, mutate: loadDeals } = useSWR('user_property_deals', fetchDeals);
+    const deals = dealsData || [];
+
+    useEffect(() => {
+        if (deals.length > 0 && formCategory === 'new') {
+            setFormCategory('existing');
+        }
+    }, [deals.length]);
+
     // Socket.io — listen for real-time investment changes
     useEffect(() => {
-        socket.on('investment:updated', loadInvestments);
-        return () => { socket.off('investment:updated', loadInvestments); };
+        socket.on('investment:updated', () => { loadInvestments(); loadDeals(); });
+        return () => { socket.off('investment:updated', () => { loadInvestments(); loadDeals(); }); };
     }, [socket, loadInvestments]);
 
     const formatDate = (d: string) => new Date(d).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -38,16 +52,19 @@ export default function InvestmentsPage() {
         e.preventDefault(); setSubmitting(true);
         try {
             const payload = {
-                propertyName: form.propertyName,
-                plotAreaSize: form.plotAreaSize,
-                propertyValue: Number(form.propertyValue),
-                propertyAddress: form.propertyAddress,
+                propertyDealId: formCategory === 'existing' ? form.propertyDealId : undefined,
+                propertyName: formCategory === 'new' ? form.propertyName : undefined,
+                unitNumber: formCategory === 'new' ? form.unitNumber : undefined,
+                plotAreaSize: formCategory === 'new' ? form.plotAreaSize : undefined,
+                propertyValue: formCategory === 'new' ? Number(form.propertyValue) : undefined,
+                propertyAddress: formCategory === 'new' ? form.propertyAddress : undefined,
                 amount: Number(form.amount),
                 installmentNo: form.isFinal ? 'Final' : form.installmentNo,
             };
             const res = await createUserInvestment(payload);
             loadInvestments();
-            setForm({ propertyName: '', plotAreaSize: '', propertyValue: '', propertyAddress: '', amount: '', installmentNo: '1', isFinal: false });
+            loadDeals();
+            setForm({ propertyDealId: '', propertyName: '', unitNumber: '', plotAreaSize: '', propertyValue: '', propertyAddress: '', amount: '', installmentNo: '1', isFinal: false });
             setShowForm(false);
             setSuccess('Investment submitted successfully! It will appear after admin approval.');
             setTimeout(() => setSuccess(''), 4000);
@@ -85,38 +102,78 @@ export default function InvestmentsPage() {
                 <div className="card" style={{ borderRadius: '10px', padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid var(--border-color)' }}>
                     <div className="section-label" style={{ fontSize: '0.6rem' }}>Submit Property Investment</div>
                     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.75rem' }}>
-                        {/* Row 1: Property Name + Plot Area */}
-                        <div className="responsive-grid-2">
-                            <div>
-                                {fieldLabel('Property Name')}
-                                <input value={form.propertyName} onChange={e => setForm(p => ({ ...p, propertyName: e.target.value }))} className="input" placeholder="e.g., Green Valley Residency" required />
-                            </div>
-                            <div>
-                                {fieldLabel('Plot Area / Size')}
-                                <input value={form.plotAreaSize} onChange={e => setForm(p => ({ ...p, plotAreaSize: e.target.value }))} className="input" placeholder="e.g., 1200 sqft, 150 sqyd" required />
-                            </div>
+                        {/* New vs Existing Toggle */}
+                        <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.5rem', marginTop: '-0.5rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                <input type="radio" name="formCategory" value="new" checked={formCategory === 'new'} onChange={() => setFormCategory('new')} style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }} />
+                                <span>Buy New Property</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                                <input type="radio" name="formCategory" value="existing" checked={formCategory === 'existing'} onChange={() => setFormCategory('existing')} style={{ accentColor: 'var(--primary)', width: '16px', height: '16px' }} />
+                                <span>Pay Installment (Existing Property)</span>
+                            </label>
                         </div>
 
-                        {/* Row 2: Property Value + Investment Amount */}
-                        <div className="responsive-grid-2">
-                            <div>
-                                {fieldLabel('Total Property Value (₹)')}
-                                <input type="number" value={form.propertyValue} onChange={e => setForm(p => ({ ...p, propertyValue: e.target.value }))} className="input" placeholder="Total property value" min="1" required />
+                        {formCategory === 'existing' ? (
+                            <div style={{ paddingBottom: '0.5rem' }}>
+                                {fieldLabel('Select Property Deal')}
+                                <select
+                                    value={form.propertyDealId}
+                                    onChange={e => setForm(p => ({ ...p, propertyDealId: e.target.value }))}
+                                    className="input"
+                                    required
+                                    style={{ width: '100%', cursor: 'pointer' }}
+                                >
+                                    <option value="" disabled>-- Select a Property Deal --</option>
+                                    {deals.map((d: any) => (
+                                        <option key={d.id} value={d.id}>
+                                            {d.propertyName} {d.unitNumber ? `(Unit: ${d.unitNumber})` : ''} - Total: {fmt(d.totalDealAmount)}
+                                        </option>
+                                    ))}
+                                </select>
                             </div>
+                        ) : (
+                            <>
+                                {/* Row 1: Property Name + Unit Number */}
+                                <div className="responsive-grid-2">
+                                    <div>
+                                        {fieldLabel('Project / Property Name')}
+                                        <input value={form.propertyName} onChange={e => setForm(p => ({ ...p, propertyName: e.target.value }))} className="input" placeholder="e.g., Green Valley Residency" required />
+                                    </div>
+                                    <div>
+                                        {fieldLabel('Unit / Plot Number')}
+                                        <input value={form.unitNumber} onChange={e => setForm(p => ({ ...p, unitNumber: e.target.value }))} className="input" placeholder="e.g., A-54" required />
+                                    </div>
+                                </div>
+
+                                {/* Row 1b: Plot Area + Property Value */}
+                                <div className="responsive-grid-2">
+                                    <div>
+                                        {fieldLabel('Plot Area / Size')}
+                                        <input value={form.plotAreaSize} onChange={e => setForm(p => ({ ...p, plotAreaSize: e.target.value }))} className="input" placeholder="e.g., 1200 sqft, 150 sqyd" required />
+                                    </div>
+                                    <div>
+                                        {fieldLabel('Total Property Value (₹)')}
+                                        <input type="number" value={form.propertyValue} onChange={e => setForm(p => ({ ...p, propertyValue: e.target.value }))} className="input" placeholder="Total property value" min="1" required />
+                                    </div>
+                                </div>
+
+                                {/* Row 2: Property Address */}
+                                <div>
+                                    {fieldLabel('Property Address')}
+                                    <textarea value={form.propertyAddress} onChange={e => setForm(p => ({ ...p, propertyAddress: e.target.value }))} className="input" style={{ minHeight: '60px' }} placeholder="Full property address — Sector, City, State" required />
+                                </div>
+                            </>
+                        )}
+
+                        <hr style={{ border: 'none', borderTop: '1px solid var(--border-color)', margin: '0.5rem 0' }} />
+
+                        {/* Always show Investment Amount and Installment details */}
+                        <div className="responsive-grid-2" style={{ alignItems: 'end' }}>
                             <div>
                                 {fieldLabel('Investment Amount (₹)')}
                                 <input type="number" value={form.amount} onChange={e => setForm(p => ({ ...p, amount: e.target.value }))} className="input" placeholder="Amount for this installment" min="1" required />
                             </div>
-                        </div>
-
-                        {/* Row 3: Property Address */}
-                        <div>
-                            {fieldLabel('Property Address')}
-                            <textarea value={form.propertyAddress} onChange={e => setForm(p => ({ ...p, propertyAddress: e.target.value }))} className="input" style={{ minHeight: '70px' }} placeholder="Full property address — Sector, City, State" required />
-                        </div>
-
-                        {/* Row 4: Installment Number + Final checkbox */}
-                        <div className="responsive-grid-2" style={{ alignItems: 'end' }}>
                             <div>
                                 {fieldLabel('Installment No.')}
                                 <input
@@ -131,19 +188,20 @@ export default function InvestmentsPage() {
                                     required={!form.isFinal}
                                 />
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', paddingBottom: '0.5rem' }}>
-                                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none' }}>
-                                    <input
-                                        type="checkbox"
-                                        checked={form.isFinal}
-                                        onChange={e => setForm(p => ({ ...p, isFinal: e.target.checked }))}
-                                        style={{ accentColor: '#34D399', width: '16px', height: '16px', cursor: 'pointer' }}
-                                    />
-                                    <span style={{ fontSize: '0.8rem', color: form.isFinal ? '#34D399' : 'var(--text-muted)', fontWeight: form.isFinal ? 600 : 400 }}>
-                                        Mark as Final Installment
-                                    </span>
-                                </label>
-                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', paddingBottom: '0.5rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', userSelect: 'none' }}>
+                                <input
+                                    type="checkbox"
+                                    checked={form.isFinal}
+                                    onChange={e => setForm(p => ({ ...p, isFinal: e.target.checked }))}
+                                    style={{ accentColor: '#34D399', width: '16px', height: '16px', cursor: 'pointer' }}
+                                />
+                                <span style={{ fontSize: '0.8rem', color: form.isFinal ? '#34D399' : 'var(--text-muted)', fontWeight: form.isFinal ? 600 : 400 }}>
+                                    Mark as Final Installment
+                                </span>
+                            </label>
                         </div>
 
                         <button type="submit" disabled={submitting} className="btn btn-primary" style={{ borderRadius: '6px', alignSelf: 'flex-start', opacity: submitting ? 0.7 : 1 }}>
@@ -168,8 +226,12 @@ export default function InvestmentsPage() {
                                     <tr key={inv.id} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                                         <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{i + 1}</td>
                                         <td style={{ padding: '0.75rem 1rem' }}>
-                                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>{inv.propertyName || inv.type || '—'}</div>
-                                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>{inv.propertyAddress || ''}</div>
+                                            <div style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '0.85rem' }}>
+                                                {inv.propertyName || inv.type || '—'}
+                                            </div>
+                                            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '2px' }}>
+                                                {inv.propertyAddress?.split(',')[0] || ''} {inv.unitNumber ? `• Unit: ${inv.unitNumber}` : ''}
+                                            </div>
                                         </td>
                                         <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{inv.plotAreaSize || '—'}</td>
                                         <td style={{ padding: '0.75rem 1rem' }}>

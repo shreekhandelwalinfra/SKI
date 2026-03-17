@@ -60,11 +60,11 @@ export default function Navbar() {
 
     // Check auth state on mount and when storage changes
     useEffect(() => {
-        const checkAuth = () => {
+        const checkAuth = async () => {
             try {
-                const token = localStorage.getItem('user-token');
+                // If we know there's user-data, the API handles the cookie check
                 const data = localStorage.getItem('user-data');
-                if (token && data) {
+                if (data) {
                     const parsed = JSON.parse(data);
                     setUser({ name: parsed.name || 'User' });
                 } else {
@@ -119,8 +119,11 @@ export default function Navbar() {
         return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
-    const handleLogout = () => {
-        localStorage.removeItem('user-token');
+    const handleLogout = async () => {
+        try {
+            const API_BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+            await fetch(`${API_BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
+        } catch (e) { console.error('Logout failed', e); }
         localStorage.removeItem('user-data');
         setUser(null);
         setDropdownOpen(false);

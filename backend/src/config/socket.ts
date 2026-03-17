@@ -27,9 +27,30 @@ export function getIO(): SocketServer | null {
     return io;
 }
 
-// Convenience: emit investment change event
-export function emitInvestmentUpdate() {
-    if (io) {
-        io.emit('investment:updated');
+// Global broadcast wrapped with a robust logger
+export function broadcastSocketEvent(event: string, payload?: any) {
+    if (!io) {
+        console.error(`[Socket] ❌ Failed to emit '${event}': io instance is null!`);
+        return;
     }
+    console.log(`[Socket] 📡 Broadcasting '${event}' to all clients`);
+    if (payload) {
+        io.emit(event, payload);
+    } else {
+        io.emit(event);
+    }
+}
+
+// Convenience methods
+export function emitInvestmentUpdate() {
+    broadcastSocketEvent('investment:updated');
+}
+
+export function emitProfitUpdate(userId: string) {
+    // Broadcasts to everyone for now, frontend will just refetch
+    broadcastSocketEvent('profit:updated', { userId });
+}
+
+export function emitTicketUpdate() {
+    broadcastSocketEvent('ticket:updated');
 }

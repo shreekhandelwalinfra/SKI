@@ -2,7 +2,9 @@ import express, { Application, Request, Response } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
+import rateLimit from 'express-rate-limit';
 import { createServer } from 'http';
 import prisma from './config/database';
 import { initSocket } from './config/socket';
@@ -25,9 +27,20 @@ const PORT = process.env.PORT || 5000;
 const httpServer = createServer(app);
 initSocket(httpServer);
 
+// Rate Limiting
+const globalLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 500, // Limit each IP to 500 requests per window
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: { status: 'error', message: 'Too many requests from this IP, please try again after 15 minutes.' }
+});
+
 // Middleware
 app.use(helmet());
+app.use(globalLimiter);
 app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(cors({
     origin: [
         'http://localhost:3000',

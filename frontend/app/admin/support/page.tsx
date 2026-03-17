@@ -73,9 +73,9 @@ export default function SupportPage() {
 
     useEffect(() => { loadTickets(); }, [statusFilter]);
 
-    // WebSocket connection for real-time updates
     useEffect(() => {
         const handleUpdate = (payload?: { action: string, ticket?: any, ticketId?: string }) => {
+            console.log('🗣️ ADMIN Socket received support:updated:', payload);
             if (!payload) {
                 loadTickets(true);
                 return;

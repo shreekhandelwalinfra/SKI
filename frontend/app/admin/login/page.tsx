@@ -17,11 +17,21 @@ export default function AdminLoginPage() {
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
+
+        if (!email.trim() || !password.trim()) {
+            return setError('Please enter both email and password');
+        }
+
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email.trim())) {
+            return setError('Please enter a valid email address');
+        }
+
         setLoading(true);
         try {
             const res = await adminLogin(email, password);
             if (res.data?.role !== 'admin') { setError('Access denied. Admin only.'); setLoading(false); return; }
-            localStorage.setItem('admin-token', res.data.token);
+            // token is automatically saved in an HttpOnly cookie
             localStorage.setItem('admin-user', JSON.stringify(res.data));
             router.push('/admin/dashboard');
         } catch (err: any) { setError(err.message || 'Login failed'); } finally { setLoading(false); }

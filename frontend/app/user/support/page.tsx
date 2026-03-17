@@ -33,6 +33,7 @@ export default function SupportPage() {
     // WebSocket connection for real-time updates (User)
     useEffect(() => {
         const handleUpdate = (payload?: { action: string, ticket?: any, ticketId?: string }) => {
+            console.log('🗣️ USER Socket received support:updated:', payload);
             if (!payload) {
                 loadTickets(true);
                 return;
@@ -112,6 +113,17 @@ export default function SupportPage() {
         return msgs.some((m: any) => m.sender === 'admin' && (!t.lastSeenByUser || new Date(m.time).getTime() > lastSeen));
     };
 
+    // Count unseen admin messages
+    const unseenAdminCount = (t: any): number => {
+        const msgs = Array.isArray(t.messages) ? t.messages : [];
+        if (!t.lastSeenByUser) return msgs.filter((m: any) => m.sender === 'admin').length;
+        const lastSeen = new Date(t.lastSeenByUser).getTime();
+        return msgs.filter((m: any) => m.sender === 'admin' && new Date(m.time).getTime() > lastSeen).length;
+    };
+
+    // Total tickets with unseen messages
+    const totalUnseen = tickets.filter(t => hasNewAdminMsg(t)).length;
+
     if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '16rem' }}><div className="skeleton" style={{ width: '200px', height: '16px' }} /></div>;
 
     return (
@@ -119,7 +131,21 @@ export default function SupportPage() {
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
                 <div>
                     <div className="section-label" style={{ fontSize: '0.65rem' }}>Help Center</div>
-                    <h2 className="heading-serif" style={{ fontSize: '1.25rem', color: 'var(--text-heading)' }}>Support</h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+                        <h2 className="heading-serif" style={{ fontSize: '1.25rem', color: 'var(--text-heading)' }}>Support</h2>
+                        {totalUnseen > 0 && (
+                            <span style={{
+                                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                                minWidth: '22px', height: '22px', borderRadius: '11px', padding: '0 6px',
+                                background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff',
+                                fontSize: '0.7rem', fontWeight: 700, fontFamily: 'var(--font-inter), sans-serif',
+                                boxShadow: '0 2px 8px rgba(239,68,68,0.4)',
+                                animation: 'pulse 2s ease-in-out infinite',
+                            }}>
+                                {totalUnseen} new
+                            </span>
+                        )}
+                    </div>
                 </div>
                 <button onClick={() => setShowForm(!showForm)} className="btn btn-primary" style={{ borderRadius: '6px', fontSize: '0.75rem' }}>
                     {showForm ? 'Cancel' : '+ New Ticket'}
@@ -145,6 +171,7 @@ export default function SupportPage() {
                         const isExpanded = expandedId === t.id;
                         const msgs = t.messages || [];
                         const hasNew = hasNewAdminMsg(t);
+                        const newCount = unseenAdminCount(t);
                         return (
                             <div key={t.id} className="card" style={{ borderRadius: '10px', overflow: 'hidden', border: `1px solid ${hasNew ? 'var(--accent-copper)' : 'var(--border-color)'}` }}>
                                 <div onClick={() => handleExpand(t.id)}
@@ -153,8 +180,15 @@ export default function SupportPage() {
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
                                             <span style={{ fontWeight: 600, fontSize: '0.9rem', color: 'var(--text-primary)', fontFamily: 'var(--font-inter), sans-serif' }}>{t.subject}</span>
                                             {hasNew && (
-                                                <span style={{ padding: '1px 7px', borderRadius: '999px', fontSize: '0.6rem', fontWeight: 700, background: 'var(--accent-copper)', color: '#fff', letterSpacing: '0.05em' }}>
-                                                    NEW REPLY
+                                                <span style={{
+                                                    padding: '2px 8px', borderRadius: '999px', fontSize: '0.62rem', fontWeight: 700,
+                                                    background: 'linear-gradient(135deg, #ef4444, #dc2626)', color: '#fff',
+                                                    display: 'inline-flex', alignItems: 'center', gap: '4px',
+                                                    boxShadow: '0 1px 6px rgba(239,68,68,0.35)',
+                                                    letterSpacing: '0.03em',
+                                                }}>
+                                                    <span style={{ width: '5px', height: '5px', borderRadius: '50%', background: '#fff', display: 'inline-block', animation: 'pulse 1.5s ease-in-out infinite' }} />
+                                                    {newCount} new
                                                 </span>
                                             )}
                                         </div>

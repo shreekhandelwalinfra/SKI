@@ -14,6 +14,7 @@ const globalSocket = io(URL, {
     reconnection: true,
     reconnectionDelay: 1000,
     reconnectionDelayMax: 5000,
+    transports: ['websocket'],
 });
 
 interface SocketContextProps {
@@ -27,17 +28,16 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
     const [isConnected, setIsConnected] = useState(false);
 
     useEffect(() => {
-        // Connect the socket when the provider mounts (i.e. user logs into dashboard)
         globalSocket.connect();
 
-        const onConnect = () => setIsConnected(true);
-        const onDisconnect = () => setIsConnected(false);
+        const onConnect = () => { console.warn('🟢 React Socket connected:', globalSocket.id); setIsConnected(true); };
+        const onDisconnect = () => { console.warn('🔴 React Socket disconnected'); setIsConnected(false); };
+        const onConnectError = (err: any) => { console.error('❌ React Socket connection error:', err?.message); };
 
         globalSocket.on('connect', onConnect);
         globalSocket.on('disconnect', onDisconnect);
+        globalSocket.on('connect_error', onConnectError);
 
-        // 2. Battery & Server Protection (Page Visibility API)
-        // If they switch tabs, disconnect immediately to save bandwidth. Reconnect when they come back.
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') {
                 if (globalSocket.disconnected) globalSocket.connect();
@@ -52,7 +52,7 @@ export function SocketProvider({ children }: { children: React.ReactNode }) {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             globalSocket.off('connect', onConnect);
             globalSocket.off('disconnect', onDisconnect);
-            // Gracefully destroy connection if they log out or leave the dashboard entirely
+            globalSocket.off('connect_error', onConnectError);
             globalSocket.disconnect();
         };
     }, []);

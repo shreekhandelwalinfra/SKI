@@ -38,7 +38,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     };
 
     if (!mounted) {
-        return <div style={{ visibility: 'hidden' }}>{children}</div>;
+        return <div suppressHydrationWarning style={{ visibility: 'hidden' }}>{children}</div>;
     }
 
     return (

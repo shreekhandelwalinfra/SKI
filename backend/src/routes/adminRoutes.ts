@@ -1,17 +1,15 @@
 import { Router } from 'express';
 import { protect, adminOnly } from '../middleware/auth';
-import {
-    getDashboardStats,
-    getUsers, addUser, activateUser, blockUser, deleteUser,
-    getInvestments, updateInvestmentStatus,
-    getPropertyDeals, createPropertyDeal, addInstallment,
-    getRewards,
-    getFirmProfit, getTeamBonus, getUserIncome,
-    getSupportTickets, updateSupportTicket, markTicketSeen, deleteSupportTicket, deleteTicketMessage,
-    changePassword,
-    getAdminUserTree, updateUserBalances,
-    cleanupDataHandler
-} from '../controllers/adminController';
+
+// ─── Domain Controllers ──────────────────────────────────
+import { getDashboardStats } from '../controllers/admin/dashboardController';
+import { getUsers, addUser, activateUser, blockUser, deleteUser, getAdminUserTree, updateUserBalances } from '../controllers/admin/userManagementController';
+import { getInvestments, updateInvestmentStatus } from '../controllers/admin/investmentController';
+import { getPropertyDeals, createPropertyDeal, addInstallment } from '../controllers/admin/propertyDealController';
+import { getRewards, getFirmProfit, getTeamBonus, getUserIncome } from '../controllers/admin/profitController';
+import { getSupportTickets, updateSupportTicket, markTicketSeen, deleteSupportTicket, deleteTicketMessage } from '../controllers/admin/supportController';
+import { changePassword, cleanupDataHandler } from '../controllers/admin/systemController';
+import { getAdminNotifications_handler, markAdminNotificationsRead, markAdminNotificationRead, getAdminLogsHandler } from '../controllers/admin/notificationController';
 
 const router = Router();
 
@@ -59,5 +57,13 @@ router.put('/change-password', changePassword);
 
 // System Cleanup
 router.post('/system/cleanup', cleanupDataHandler);
+
+// Notifications
+router.get('/notifications', getAdminNotifications_handler);
+router.put('/notifications/read', markAdminNotificationsRead);
+router.put('/notifications/:id/read', markAdminNotificationRead);
+
+// Admin Audit Logs
+router.get('/logs', getAdminLogsHandler);
 
 export default router;

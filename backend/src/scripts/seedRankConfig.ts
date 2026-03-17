@@ -1,4 +1,4 @@
-import prisma from './config/database';
+import prisma from '../config/database';
 
 const RANK_TIERS = [
     { rank: 1, teamBusinessMin: 0, teamBusinessMax: 499999, commissionPct: 3, selfInvestment: 500000, rewardName: 'Mobile', rewardValue: 5000 },

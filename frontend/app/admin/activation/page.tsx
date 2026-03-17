@@ -11,9 +11,17 @@ interface UserItem {
     email: string;
     phone: string;
     uniqueId: string;
+    referralCode?: string;
     status: string;
     isBlocked: boolean;
+    rank?: number;
+    selfReward?: number;
+    directBonus?: number;
+    teamBonus?: number;
+    totalBusiness?: number;
+    selfInvestment?: number;
     createdAt: string;
+    activatedAt?: string;
     referredBy?: { name: string; uniqueId: string } | null;
     teamLead?: { name: string; uniqueId: string } | null;
 }
@@ -210,30 +218,71 @@ export default function ActivationPage() {
 
                                 {/* Expanded Details */}
                                 {isExpanded && (
-                                    <div style={{ borderTop: '1px solid #22222E', padding: '16px 20px', background: '#151520' }}>
-                                        <div className="overflow-scroll-x">
-                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '16px', marginBottom: '16px', minWidth: '400px' }}>
-                                                <div>
-                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Referred By</div>
-                                                    <div style={{ fontSize: '0.8rem', color: user.referredBy ? '#C4956A' : '#555' }}>
-                                                        {user.referredBy ? `${user.referredBy.name} (${user.referredBy.uniqueId})` : 'Direct signup'}
-                                                    </div>
+                                    <div style={{ borderTop: '1px solid #22222E', padding: '20px', background: '#12121C' }}>
+
+                                        {/* ── Section: Contact Info ── */}
+                                        <div style={{ fontSize: '0.52rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '8px' }}>Contact Information</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                                            {[{ label: 'Email', value: user.email }, { label: 'Phone', value: user.phone || '—' }].map(f => (
+                                                <div key={f.label} style={{ background: '#1A1A26', borderRadius: '8px', padding: '10px 12px', border: '1px solid #22222E' }}>
+                                                    <div style={{ fontSize: '0.55rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '3px' }}>{f.label}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: '#C0B8AE', wordBreak: 'break-all' }}>{f.value}</div>
                                                 </div>
-                                                <div>
-                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Team Lead</div>
-                                                    <div style={{ fontSize: '0.8rem', color: user.teamLead ? '#60A5FA' : '#555' }}>
-                                                        {user.teamLead ? `${user.teamLead.name} (${user.teamLead.uniqueId})` : 'None'}
-                                                    </div>
+                                            ))}
+                                        </div>
+
+                                        {/* ── Section: Account Details ── */}
+                                        <div style={{ fontSize: '0.52rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '8px' }}>Account Details</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                                            {[
+                                                { label: 'Member ID', value: user.uniqueId, mono: true },
+                                                { label: 'Referral Code', value: user.referralCode || '—', mono: true },
+                                                { label: 'Rank', value: user.rank && user.rank > 0 ? `Level ${user.rank}` : 'Unranked' },
+                                                { label: 'Registered', value: fmtDate(user.createdAt) },
+                                                { label: 'Activated', value: user.activatedAt ? fmtDate(user.activatedAt) : 'Not yet' },
+                                                { label: 'Blocked', value: user.isBlocked ? 'Yes' : 'No' },
+                                            ].map(f => (
+                                                <div key={f.label} style={{ background: '#1A1A26', borderRadius: '8px', padding: '10px 12px', border: '1px solid #22222E' }}>
+                                                    <div style={{ fontSize: '0.55rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '3px' }}>{f.label}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: (f as any).mono ? '#C4956A' : '#C0B8AE', fontFamily: (f as any).mono ? 'monospace' : 'inherit' }}>{f.value}</div>
                                                 </div>
-                                                <div>
-                                                    <div style={{ fontSize: '0.6rem', textTransform: 'uppercase', letterSpacing: '0.1em', color: '#666', marginBottom: '4px' }}>Registered On</div>
-                                                    <div style={{ fontSize: '0.8rem', color: '#C0B8AE' }}>{fmtDate(user.createdAt)}</div>
+                                            ))}
+                                        </div>
+
+                                        {/* ── Section: Referral Network ── */}
+                                        <div style={{ fontSize: '0.52rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '8px' }}>Referral Network</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px', marginBottom: '16px' }}>
+                                            {[
+                                                { label: 'Referred By', value: user.referredBy ? `${user.referredBy.name} (${user.referredBy.uniqueId})` : 'Direct / Admin', color: user.referredBy ? '#C4956A' : '#555' },
+                                                { label: 'Team Lead', value: user.teamLead ? `${user.teamLead.name} (${user.teamLead.uniqueId})` : 'None', color: user.teamLead ? '#60A5FA' : '#555' },
+                                            ].map(f => (
+                                                <div key={f.label} style={{ background: '#1A1A26', borderRadius: '8px', padding: '10px 12px', border: '1px solid #22222E' }}>
+                                                    <div style={{ fontSize: '0.55rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '3px' }}>{f.label}</div>
+                                                    <div style={{ fontSize: '0.8rem', color: f.color }}>{f.value}</div>
                                                 </div>
-                                            </div>
+                                            ))}
+                                        </div>
+
+                                        {/* ── Section: Financial Summary ── */}
+                                        <div style={{ fontSize: '0.52rem', color: '#a78bfa', textTransform: 'uppercase', letterSpacing: '0.15em', fontWeight: 600, marginBottom: '8px' }}>Financial Summary</div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: '8px', marginBottom: '20px' }}>
+                                            {[
+                                                { label: 'Self Investment', value: user.selfInvestment || 0, color: '#6ee7b7' },
+                                                { label: 'Team Volume', value: user.totalBusiness || 0, color: '#93c5fd' },
+                                                { label: 'Self Reward', value: user.selfReward || 0, color: '#fbbf24' },
+                                                { label: 'Direct Bonus', value: user.directBonus || 0, color: '#f472b6' },
+                                                { label: 'Team Bonus', value: user.teamBonus || 0, color: '#a78bfa' },
+                                                { label: 'Total Earnings', value: (user.selfReward || 0) + (user.directBonus || 0) + (user.teamBonus || 0), color: '#C4956A' },
+                                            ].map(f => (
+                                                <div key={f.label} style={{ background: `${f.color}0D`, borderRadius: '8px', padding: '10px 12px', border: `1px solid ${f.color}22` }}>
+                                                    <div style={{ fontSize: '0.5rem', color: '#666', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '3px' }}>{f.label}</div>
+                                                    <div style={{ fontSize: '0.9rem', color: f.color, fontWeight: 700 }}>₹{(f.value).toLocaleString('en-IN')}</div>
+                                                </div>
+                                            ))}
                                         </div>
 
                                         {/* Action Buttons */}
-                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', paddingTop: '4px', borderTop: '1px solid #22222E' }}>
                                             {user.status === 'PENDING' && (
                                                 <button
                                                     onClick={(e) => { e.stopPropagation(); setConfirmModal({ id: user.id, action: 'activate', name: user.name }); }}

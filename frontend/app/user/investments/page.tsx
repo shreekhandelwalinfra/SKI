@@ -94,6 +94,54 @@ export default function InvestmentsPage() {
 
     if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '16rem' }}><div className="skeleton" style={{ width: '200px', height: '16px' }} /></div>;
 
+    if (!isApproved) {
+        return (
+            <div>
+                <div style={{ marginBottom: '1.5rem' }}>
+                    <div className="section-label" style={{ fontSize: '0.65rem' }}>Portfolio</div>
+                    <h2 className="heading-serif" style={{ fontSize: '1.25rem', color: 'var(--text-heading)' }}>Property Investments</h2>
+                </div>
+
+                <div style={{
+                    padding: '60px 24px', borderRadius: '16px',
+                    background: 'linear-gradient(160deg, #0D0D18 0%, #111827 50%, #1B2A4A 100%)',
+                    textAlign: 'center', border: '1px solid rgba(196,149,106,0.15)'
+                }}>
+                    <div style={{ maxWidth: '520px', margin: '0 auto' }}>
+                        <div style={{
+                            width: '80px', height: '80px', borderRadius: '50%',
+                            background: 'linear-gradient(135deg, rgba(196,149,106,0.15), rgba(196,149,106,0.05))',
+                            border: '2px solid rgba(196,149,106,0.25)',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            margin: '0 auto 24px',
+                        }}>
+                            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C4956A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                                <circle cx="12" cy="12" r="10" />
+                                <line x1="12" y1="8" x2="12" y2="12" />
+                                <line x1="12" y1="16" x2="12.01" y2="16" />
+                            </svg>
+                        </div>
+
+                        <h2 style={{
+                            fontFamily: 'var(--font-playfair), Georgia, serif',
+                            fontSize: '1.5rem', fontWeight: 700, color: '#F5F0EB',
+                            marginBottom: '12px', lineHeight: 1.3,
+                        }}>
+                            Investments Locked
+                        </h2>
+
+                        <p style={{ fontSize: '0.92rem', color: '#8888A0', lineHeight: 1.7, marginBottom: '8px' }}>
+                            Your account is currently <span style={{ color: '#FBBF24', fontWeight: 600 }}>pending approval</span>.
+                        </p>
+                        <p style={{ fontSize: '0.85rem', color: '#6B6B80', lineHeight: 1.7 }}>
+                            You cannot view or make new property investments until the admin verifies your account. Please wait for activation.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.5rem' }}>
@@ -102,15 +150,9 @@ export default function InvestmentsPage() {
                     <h2 className="heading-serif" style={{ fontSize: '1.25rem', color: 'var(--text-heading)' }}>Property Investments</h2>
                 </div>
                 <button
-                    onClick={() => isApproved && setShowForm(!showForm)}
+                    onClick={() => setShowForm(!showForm)}
                     className="btn btn-primary"
-                    style={{
-                        borderRadius: '6px',
-                        fontSize: '0.75rem',
-                        opacity: isApproved ? 1 : 0.5,
-                        cursor: isApproved ? 'pointer' : 'not-allowed'
-                    }}
-                    title={isApproved ? "" : "Your account is pending admin approval"}
+                    style={{ borderRadius: '6px', fontSize: '0.75rem' }}
                 >
                     {showForm ? 'Cancel' : '+ New Investment'}
                 </button>

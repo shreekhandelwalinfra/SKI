@@ -3,3 +3,13 @@ node_modules
 .env
 
 /src/generated/prisma
+
+# Temporary / Testing Scripts
+test-*.js
+test-*.ts
+temp-*.js
+temp-*.ts
+script-*.js
+script-*.ts
+scripts/
+src/scripts/

@@ -54,14 +54,14 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
 
     useEffect(() => {
         setMounted(true);
-        if (pathname !== '/admin/login') {
+        if (pathname !== '/admin/login' && pathname !== '/admin/forgot-password') {
             const hasAdminData = localStorage.getItem('admin-user');
             if (!hasAdminData) router.push('/admin/login');
         }
     }, [pathname, router]);
 
     if (!mounted) return null;
-    if (pathname === '/admin/login') return <>{children}</>;
+    if (pathname === '/admin/login' || pathname === '/admin/forgot-password') return <>{children}</>;
 
     const handleLogout = async () => {
         try {

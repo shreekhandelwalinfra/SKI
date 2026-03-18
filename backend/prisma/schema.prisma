@@ -32,6 +32,11 @@ model User {
   emailOTPSentAt      DateTime? // Used to enforce 60-second cooldown on resend
   emailOTPAttempts    Int       @default(0) // Max 3 OTP sends per email per session
 
+  // Password Reset
+  resetPasswordOTP        String?   // 6-digit OTP exclusively for password resets
+  resetPasswordExpiresAt  DateTime? // 10-minute expiry
+  resetPasswordAttempts   Int       @default(0) // Max 3 failures before locking the OTP
+
   // Profile details
   address     String   @default("")
   city        String   @default("")

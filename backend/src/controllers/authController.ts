@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import prisma from '../config/database';
 import { AuthRequest } from '../middleware/auth';
-import { sendVerificationEmail } from '../services/emailService';
+import { sendVerificationEmail, sendPasswordResetEmail } from '../services/emailService';
 
 // ─── TOKEN HELPERS ───────────────────────────────────────────
 
@@ -292,8 +292,12 @@ export const login = async (req: Request, res: Response): Promise<void> => {
 
 export const getMe = async (req: AuthRequest, res: Response): Promise<void> => {
     try {
+        if (!req.user || !req.user.id) {
+            res.status(401).json({ status: 'error', message: 'Not authenticated' });
+            return;
+        }
         const user = await prisma.user.findUnique({
-            where: { id: req.user?.id },
+            where: { id: req.user.id },
             select: {
                 id: true, name: true, email: true, phone: true, role: true,
                 uniqueId: true, referralCode: true, status: true, rank: true,
@@ -315,4 +319,99 @@ export const logout = async (req: Request, res: Response): Promise<void> => {
         httpOnly: true,
     });
     res.status(200).json({ status: 'success', data: {} });
+};
+
+// ─── PASSWORD RECOVERY ──────────────────────────────────────
+
+export const forgotPassword = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email } = req.body;
+
+        const user = await prisma.user.findUnique({ where: { email } });
+        // SECURITY: Always return success even if user doesn't exist to prevent email enumeration
+        if (!user) {
+            res.status(200).json({ status: 'success', message: 'If an account exists, a reset code has been sent.' });
+            return;
+        }
+
+        const otp = generateOTP();
+        const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 mins
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                resetPasswordOTP: otp,
+                resetPasswordExpiresAt: expiresAt,
+                resetPasswordAttempts: 0,
+            },
+        });
+
+        console.log(`[TEST DEBUG] Password Reset OTP for ${email}:`, otp);
+
+        await sendPasswordResetEmail(user.email, otp, user.name);
+
+        res.status(200).json({ status: 'success', message: 'If an account exists, a reset code has been sent.' });
+    } catch (error) {
+        console.error('Forgot password error:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to process request' });
+    }
+};
+
+export const resetPassword = async (req: Request, res: Response): Promise<void> => {
+    try {
+        const { email, otp, newPassword } = req.body;
+
+        if (!email || !otp || !newPassword || newPassword.length < 6) {
+            res.status(400).json({ status: 'error', message: 'Invalid input data' });
+            return;
+        }
+
+        const user = await prisma.user.findUnique({ where: { email } });
+
+        if (!user || user.resetPasswordOTP !== otp || !user.resetPasswordExpiresAt) {
+            // Check if user exists to increment attempts
+            if (user && user.resetPasswordOTP) {
+                const newAttempts = user.resetPasswordAttempts + 1;
+                if (newAttempts >= 3) {
+                    await prisma.user.update({
+                        where: { id: user.id },
+                        data: { resetPasswordOTP: null, resetPasswordExpiresAt: null, resetPasswordAttempts: 0 },
+                    });
+                    res.status(400).json({ status: 'error', message: 'Too many invalid attempts. Please request a new code.' });
+                    return;
+                }
+                await prisma.user.update({
+                    where: { id: user.id },
+                    data: { resetPasswordAttempts: newAttempts },
+                });
+            }
+            res.status(400).json({ status: 'error', message: 'Invalid or expired reset code' });
+            return;
+        }
+
+        // Check expiration
+        if (user.resetPasswordExpiresAt && new Date() > user.resetPasswordExpiresAt) {
+            res.status(400).json({ status: 'error', message: 'Reset code has expired' });
+            return;
+        }
+
+        // All good, reset password and nullify OTP
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        await prisma.user.update({
+            where: { id: user.id },
+            data: {
+                password: hashedPassword,
+                resetPasswordOTP: null,
+                resetPasswordExpiresAt: null,
+                resetPasswordAttempts: 0,
+            },
+        });
+
+        res.status(200).json({ status: 'success', message: 'Password has been successfully reset' });
+    } catch (error) {
+        console.error('Reset password error:', error);
+        res.status(500).json({ status: 'error', message: 'Failed to reset password' });
+    }
 };

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import rateLimit from 'express-rate-limit';
-import { register, login, getMe, verifyEmail, resendVerification, logout } from '../controllers/authController';
+import { register, login, getMe, verifyEmail, resendVerification, logout, forgotPassword, resetPassword } from '../controllers/authController';
 import { protect } from '../middleware/auth';
 import { validateRequest } from '../middleware/validate';
 import { registerSchema, loginSchema } from '../validators/auth.validators';
@@ -45,6 +45,10 @@ router.post('/login', authLimiter, validateRequest(loginSchema), login);
 // OTP verification (no auth needed — user doesn't have a token yet)
 router.post('/verify-email', otpLimiter, verifyEmail);
 router.post('/resend-verification', otpLimiter, resendVerification);
+
+// Password Reset (Rate limited individually)
+router.post('/forgot-password', otpLimiter, forgotPassword);
+router.post('/reset-password', otpLimiter, resetPassword);
 
 // ─── PROTECTED ROUTES ────────────────────────────────────────
 

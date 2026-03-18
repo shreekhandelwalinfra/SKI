@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { changePassword } from '../lib/api';
+import { changePassword, requestPasswordReset, resetPasswordWithOTP } from '../lib/api';
 
 export default function ChangePasswordPage() {
     const [currentPassword, setCurrentPassword] = useState('');
@@ -10,6 +10,11 @@ export default function ChangePasswordPage() {
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+
+    // OTP Reset State
+    const [otpMode, setOtpMode] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [otpLoading, setOtpLoading] = useState(false);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -26,6 +31,56 @@ export default function ChangePasswordPage() {
             setConfirmPassword('');
         } catch (err: any) {
             setError(err.message || 'Failed to change password');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleRequestOTP = async () => {
+        try {
+            setError('');
+            setMessage('');
+            let adminEmail = '';
+            const stored = localStorage.getItem('admin-user');
+            if (stored) {
+                const parsed = JSON.parse(stored);
+                adminEmail = parsed.email;
+            }
+            if (!adminEmail) throw new Error('Could not find admin email in session');
+
+            setOtpLoading(true);
+            await requestPasswordReset(adminEmail);
+            setOtpMode(true);
+            setMessage(`A 6-digit authorization code has been sent to ${adminEmail}.`);
+        } catch (err: any) {
+            setError(err.message || 'Failed to request authorization code');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleResetOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setMessage('');
+        setError('');
+        if (newPassword !== confirmPassword) { setError('New password and confirm password do not match.'); return; }
+        if (newPassword.length < 6) { setError('New password must be at least 6 characters.'); return; }
+        if (otp.length !== 6) { setError('Please enter a valid 6-digit code.'); return; }
+        setLoading(true);
+        try {
+            let adminEmail = '';
+            const stored = localStorage.getItem('admin-user');
+            if (stored) adminEmail = JSON.parse(stored).email;
+
+            await resetPasswordWithOTP(adminEmail, otp, newPassword);
+            setMessage('Password successfully reset using authorization code!');
+            setOtpMode(false);
+            setOtp('');
+            setCurrentPassword('');
+            setNewPassword('');
+            setConfirmPassword('');
+        } catch (err: any) {
+            setError(err.message || 'Failed to reset password');
         } finally {
             setLoading(false);
         }
@@ -87,61 +142,126 @@ export default function ChangePasswordPage() {
                         </div>
                     )}
 
-                    <form onSubmit={handleSubmit}>
-                        {fields.map(f => (
-                            <div key={f.id} style={{ marginBottom: '1.1rem' }}>
+                    {!otpMode ? (
+                        <form onSubmit={handleSubmit}>
+                            <div style={{ marginBottom: '1.1rem' }}>
                                 <label style={{ display: 'block', fontSize: '0.63rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7A7A8A', fontFamily: 'var(--font-inter), sans-serif', marginBottom: '0.5rem' }}>
-                                    {f.label}
+                                    Current Password
                                 </label>
                                 <input
                                     type="password"
-                                    value={f.value}
-                                    onChange={e => f.set(e.target.value)}
+                                    value={currentPassword}
+                                    onChange={e => setCurrentPassword(e.target.value)}
                                     className="admin-input"
                                     required
                                 />
-                                {/* Strength bar after new password field */}
-                                {f.id === 'new' && newPassword && (
-                                    <div style={{ marginTop: '0.5rem' }}>
-                                        <div style={{ display: 'flex', gap: '3px', marginBottom: '4px' }}>
-                                            {[1, 2, 3, 4].map(i => (
-                                                <div key={i} style={{ flex: 1, height: '3px', borderRadius: '2px', background: i <= strength ? strengthColor : 'rgba(255,255,255,0.07)', transition: 'background 0.3s ease' }} />
-                                            ))}
-                                        </div>
-                                        <div style={{ fontSize: '0.65rem', color: strengthColor, fontFamily: 'var(--font-inter), sans-serif', transition: 'color 0.3s' }}>{strengthLabel}</div>
-                                    </div>
-                                )}
+                                <div style={{ marginTop: '0.5rem', textAlign: 'right' }}>
+                                    <button type="button" onClick={handleRequestOTP} disabled={otpLoading} style={{ background: 'none', border: 'none', fontSize: '0.7rem', color: '#C4956A', cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif', opacity: otpLoading ? 0.6 : 1, transition: 'color 0.2s' }}>
+                                        {otpLoading ? 'Generating Code...' : 'Forgot your current password?'}
+                                    </button>
+                                </div>
                             </div>
-                        ))}
+                            {fields.slice(1).map(f => (
+                                <div key={f.id} style={{ marginBottom: '1.1rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.63rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7A7A8A', fontFamily: 'var(--font-inter), sans-serif', marginBottom: '0.5rem' }}>
+                                        {f.label}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={f.value}
+                                        onChange={e => f.set(e.target.value)}
+                                        className="admin-input"
+                                        required
+                                    />
+                                    {f.id === 'new' && newPassword && (
+                                        <div style={{ marginTop: '0.5rem' }}>
+                                            <div style={{ display: 'flex', gap: '3px', marginBottom: '4px' }}>
+                                                {[1, 2, 3, 4].map(i => (
+                                                    <div key={i} style={{ flex: 1, height: '3px', borderRadius: '2px', background: i <= strength ? strengthColor : 'rgba(255,255,255,0.07)', transition: 'background 0.3s ease' }} />
+                                                ))}
+                                            </div>
+                                            <div style={{ fontSize: '0.65rem', color: strengthColor, fontFamily: 'var(--font-inter), sans-serif', transition: 'color 0.3s' }}>{strengthLabel}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            ))}
 
-                        <button
-                            type="submit"
-                            disabled={loading}
-                            style={{
-                                width: '100%', marginTop: '0.5rem', padding: '0.8rem',
-                                borderRadius: '10px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
-                                background: loading ? 'rgba(196,149,106,0.4)' : '#C4956A',
-                                color: '#fff', fontSize: '0.78rem', fontWeight: 600,
-                                letterSpacing: '0.12em', textTransform: 'uppercase',
-                                fontFamily: 'var(--font-inter), sans-serif',
-                                boxShadow: loading ? 'none' : '0 4px 16px rgba(196,149,106,0.3)',
-                                transition: 'all 0.2s ease',
-                                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
-                            }}
-                        >
-                            {loading ? (
-                                <>
-                                    <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
-                                    Updating...
-                                </>
-                            ) : (
-                                <>
-                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                                    Update Password
-                                </>
-                            )}
-                        </button>
-                    </form>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                style={{
+                                    width: '100%', marginTop: '0.5rem', padding: '0.8rem',
+                                    borderRadius: '10px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
+                                    background: loading ? 'rgba(196,149,106,0.4)' : '#C4956A',
+                                    color: '#fff', fontSize: '0.78rem', fontWeight: 600,
+                                    letterSpacing: '0.12em', textTransform: 'uppercase',
+                                    fontFamily: 'var(--font-inter), sans-serif',
+                                    boxShadow: loading ? 'none' : '0 4px 16px rgba(196,149,106,0.3)',
+                                    transition: 'all 0.2s ease',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                }}
+                            >
+                                {loading ? (
+                                    <>
+                                        <span style={{ width: '14px', height: '14px', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.7s linear infinite', display: 'inline-block' }} />
+                                        Updating...
+                                    </>
+                                ) : (
+                                    <>
+                                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                                        Update Password
+                                    </>
+                                )}
+                            </button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleResetOTP}>
+                            <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(196,149,106,0.05)', borderRadius: '10px', border: '1px solid rgba(196,149,106,0.15)' }}>
+                                <div style={{ fontSize: '0.85rem', color: '#F5F0EB', fontWeight: 600, marginBottom: '0.25rem' }}>Authorization Code Sent</div>
+                                <div style={{ fontSize: '0.72rem', color: '#7A7A8A', lineHeight: 1.5 }}>Please enter the 6-digit code delivered to your administrative email to authorize this password reset.</div>
+                            </div>
+
+                            <div style={{ marginBottom: '1.25rem' }}>
+                                <label style={{ display: 'block', fontSize: '0.63rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7A7A8A', fontFamily: 'var(--font-inter), sans-serif', marginBottom: '0.5rem' }}>
+                                    6-Digit Authorization Code
+                                </label>
+                                <input
+                                    type="text"
+                                    value={otp}
+                                    onChange={e => setOtp(e.target.value)}
+                                    className="admin-input"
+                                    placeholder="000000"
+                                    maxLength={6}
+                                    required
+                                    style={{ letterSpacing: '6px', fontSize: '1.2rem', textAlign: 'center', fontWeight: 'bold' }}
+                                />
+                            </div>
+
+                            {fields.slice(1).map(f => (
+                                <div key={f.id} style={{ marginBottom: '1.1rem' }}>
+                                    <label style={{ display: 'block', fontSize: '0.63rem', letterSpacing: '0.15em', textTransform: 'uppercase', color: '#7A7A8A', fontFamily: 'var(--font-inter), sans-serif', marginBottom: '0.5rem' }}>
+                                        {f.label}
+                                    </label>
+                                    <input
+                                        type="password"
+                                        value={f.value}
+                                        onChange={e => f.set(e.target.value)}
+                                        className="admin-input"
+                                        required
+                                    />
+                                </div>
+                            ))}
+
+                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
+                                <button type="button" onClick={() => { setOtpMode(false); setOtp(''); }} style={{ flex: 1, padding: '0.8rem', borderRadius: '10px', border: '1px solid var(--admin-border)', background: 'transparent', color: '#7A7A8A', fontSize: '0.78rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.1em', cursor: 'pointer', transition: 'all 0.2s' }}>
+                                    Cancel
+                                </button>
+                                <button type="submit" disabled={loading} style={{ flex: 2, padding: '0.8rem', borderRadius: '10px', border: 'none', cursor: loading ? 'not-allowed' : 'pointer', background: loading ? 'rgba(196,149,106,0.4)' : '#C4956A', color: '#fff', fontSize: '0.78rem', fontWeight: 600, letterSpacing: '0.1em', textTransform: 'uppercase', boxShadow: loading ? 'none' : '0 4px 16px rgba(196,149,106,0.3)', transition: 'all 0.2s ease', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {loading ? 'Authorizing...' : 'Authorize Reset'}
+                                </button>
+                            </div>
+                        </form>
+                    )}
                 </div>
             </div>
         </div>

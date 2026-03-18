@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { getUserProfile, updateUserProfile, changeUserPassword, updateBankDetails } from '../lib/api';
+import { getUserProfile, updateUserProfile, changeUserPassword, updateBankDetails, requestPasswordReset, resetPasswordWithOTP } from '../lib/api';
 import useSWR from 'swr';
 
 export default function ProfilePage() {
@@ -12,6 +12,11 @@ export default function ProfilePage() {
     const [bank, setBank] = useState({ accountHolder: '', accountNumber: '', ifscCode: '', bankName: '', branchName: '', upiId: '' });
     const [pwd, setPwd] = useState({ currentPassword: '', newPassword: '', confirmPassword: '' });
     const [initialized, setInitialized] = useState(false);
+
+    // OTP Reset State
+    const [otpMode, setOtpMode] = useState(false);
+    const [otp, setOtp] = useState('');
+    const [otpLoading, setOtpLoading] = useState(false);
 
     const fetchProfile = async () => {
         const res = await getUserProfile();
@@ -26,10 +31,43 @@ export default function ProfilePage() {
 
     const { data: profile, isLoading: loading } = useSWR('user_profile', fetchProfile);
 
-    const showMsg = (t: string, text: string) => { setMsg({ type: t, text }); setTimeout(() => setMsg({ type: '', text: '' }), 3000); };
+    const showMsg = (t: string, text: string) => { setMsg({ type: t, text }); setTimeout(() => setMsg({ type: '', text: '' }), 4000); };
     const handlePersonal = async (e: React.FormEvent) => { e.preventDefault(); setSaving(true); try { await updateUserProfile(personal); showMsg('success', 'Profile updated successfully!'); } catch (err: any) { showMsg('error', err.message); } finally { setSaving(false); } };
     const handleBank = async (e: React.FormEvent) => { e.preventDefault(); setSaving(true); try { await updateBankDetails(bank); showMsg('success', 'Bank details updated!'); } catch (err: any) { showMsg('error', err.message); } finally { setSaving(false); } };
     const handlePassword = async (e: React.FormEvent) => { e.preventDefault(); if (pwd.newPassword !== pwd.confirmPassword) { showMsg('error', 'Passwords do not match'); return; } if (pwd.newPassword.length < 6) { showMsg('error', 'Minimum 6 characters'); return; } setSaving(true); try { await changeUserPassword({ currentPassword: pwd.currentPassword, newPassword: pwd.newPassword }); showMsg('success', 'Password changed!'); setPwd({ currentPassword: '', newPassword: '', confirmPassword: '' }); } catch (err: any) { showMsg('error', err.message); } finally { setSaving(false); } };
+
+    const handleRequestOTP = async () => {
+        if (!profile?.email) return showMsg('error', 'Email not found');
+        setOtpLoading(true);
+        try {
+            await requestPasswordReset(profile.email);
+            setOtpMode(true);
+            showMsg('success', 'A 6-digit code has been sent to your email.');
+        } catch (err: any) {
+            showMsg('error', err.message || 'Failed to request OTP');
+        } finally {
+            setOtpLoading(false);
+        }
+    };
+
+    const handleResetOTP = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (pwd.newPassword !== pwd.confirmPassword) { showMsg('error', 'Passwords do not match'); return; }
+        if (pwd.newPassword.length < 6) { showMsg('error', 'Minimum 6 characters'); return; }
+        if (otp.length !== 6) { showMsg('error', 'Please enter a valid 6-digit code'); return; }
+        setSaving(true);
+        try {
+            await resetPasswordWithOTP(profile.email, otp, pwd.newPassword);
+            showMsg('success', 'Password successfully reset!');
+            setOtpMode(false);
+            setOtp('');
+            setPwd({ currentPassword: '', newPassword: '', confirmPassword: '' });
+        } catch (err: any) {
+            showMsg('error', err.message || 'Failed to reset password');
+        } finally {
+            setSaving(false);
+        }
+    };
 
     if (loading) return <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '16rem' }}><div className="skeleton" style={{ width: '200px', height: '16px' }} /></div>;
 
@@ -104,19 +142,59 @@ export default function ProfilePage() {
             )}
 
             {tab === 'password' && (
-                <form onSubmit={handlePassword} className="card" style={{ borderRadius: '10px', padding: '1.5rem', maxWidth: '400px', border: '1px solid var(--border-color)' }}>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.25rem' }}>
-                        {['currentPassword', 'newPassword', 'confirmPassword'].map(k => (
-                            <div key={k}>
-                                <label className="text-tracked" style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
-                                    {k === 'currentPassword' ? 'Current Password' : k === 'newPassword' ? 'New Password' : 'Confirm New Password'}
-                                </label>
-                                <input type="password" value={(pwd as any)[k]} onChange={e => setPwd(p => ({ ...p, [k]: e.target.value }))} className="input" required />
+                <div className="card" style={{ borderRadius: '10px', padding: '1.5rem', maxWidth: '400px', border: '1px solid var(--border-color)' }}>
+                    {!otpMode ? (
+                        <form onSubmit={handlePassword}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.25rem' }}>
+                                <div>
+                                    <label className="text-tracked" style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                                        Current Password
+                                    </label>
+                                    <input type="password" value={pwd.currentPassword} onChange={e => setPwd(p => ({ ...p, currentPassword: e.target.value }))} className="input" required />
+                                    <div style={{ marginTop: '0.5rem', textAlign: 'right' }}>
+                                        <button type="button" onClick={handleRequestOTP} disabled={otpLoading} style={{ background: 'none', border: 'none', fontSize: '0.7rem', color: 'var(--accent-copper)', cursor: 'pointer', fontFamily: 'var(--font-inter), sans-serif', opacity: otpLoading ? 0.6 : 1 }}>
+                                            {otpLoading ? 'Requesting Code...' : 'Forgot current password?'}
+                                        </button>
+                                    </div>
+                                </div>
+                                {['newPassword', 'confirmPassword'].map(k => (
+                                    <div key={k}>
+                                        <label className="text-tracked" style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                                            {k === 'newPassword' ? 'New Password' : 'Confirm New Password'}
+                                        </label>
+                                        <input type="password" value={(pwd as any)[k]} onChange={e => setPwd(p => ({ ...p, [k]: e.target.value }))} className="input" required />
+                                    </div>
+                                ))}
                             </div>
-                        ))}
-                    </div>
-                    <button type="submit" disabled={saving} className="btn btn-primary" style={{ borderRadius: '6px', opacity: saving ? 0.7 : 1 }}>{saving ? 'Changing...' : 'Change Password'}</button>
-                </form>
+                            <button type="submit" disabled={saving} className="btn btn-primary" style={{ borderRadius: '6px', opacity: saving ? 0.7 : 1, width: '100%' }}>{saving ? 'Changing...' : 'Change Password'}</button>
+                        </form>
+                    ) : (
+                        <form onSubmit={handleResetOTP}>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <div style={{ fontSize: '0.85rem', color: 'var(--text-heading)', fontWeight: 600, marginBottom: '0.25rem' }}>Password Recovery</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>We sent a 6-digit code to {profile?.email}. Enter it below with your new password.</div>
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginBottom: '1.25rem' }}>
+                                <div>
+                                    <label className="text-tracked" style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>6-Digit Authorization Code</label>
+                                    <input type="text" value={otp} onChange={e => setOtp(e.target.value)} className="input" placeholder="000000" maxLength={6} required style={{ letterSpacing: '4px', fontSize: '1.1rem', textAlign: 'center' }} />
+                                </div>
+                                {['newPassword', 'confirmPassword'].map(k => (
+                                    <div key={k}>
+                                        <label className="text-tracked" style={{ display: 'block', fontSize: '0.6rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                                            {k === 'newPassword' ? 'New Password' : 'Confirm New Password'}
+                                        </label>
+                                        <input type="password" value={(pwd as any)[k]} onChange={e => setPwd(p => ({ ...p, [k]: e.target.value }))} className="input" required />
+                                    </div>
+                                ))}
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                <button type="button" onClick={() => setOtpMode(false)} disabled={saving} className="btn" style={{ flex: 1, borderRadius: '6px', background: 'var(--bg-surface-alt)', color: 'var(--text-secondary)', border: '1px solid var(--border-color)', opacity: saving ? 0.7 : 1 }}>Cancel</button>
+                                <button type="submit" disabled={saving} className="btn btn-primary" style={{ flex: 2, borderRadius: '6px', opacity: saving ? 0.7 : 1 }}>{saving ? 'Resetting...' : 'Reset Password'}</button>
+                            </div>
+                        </form>
+                    )}
+                </div>
             )}
         </div>
     );

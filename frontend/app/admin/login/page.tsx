@@ -102,7 +102,10 @@ export default function AdminLoginPage() {
                             <input type="email" value={email} onChange={e => setEmail(e.target.value)} className="input" required />
                         </div>
                         <div style={{ marginBottom: '1.75rem' }}>
-                            <label className="text-tracked" style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Password</label>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
+                                <label className="text-tracked" style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)' }}>Password</label>
+                                <Link href="/admin/forgot-password" style={{ fontSize: '0.75rem', color: 'var(--accent-copper)' }}>Forgot Password?</Link>
+                            </div>
                             <div style={{ position: 'relative' }}>
                                 <input
                                     type={showPassword ? "text" : "password"}

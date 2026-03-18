@@ -35,8 +35,8 @@ export default function UserLayout({ children }: { children: ReactNode }) {
 
     // Fetch fresh user data from API
     const refreshUserData = useCallback(async () => {
-        // Do not fetch /auth/me on login or signup pages as it will unnecessarily return 401
-        if (pathname === '/user/login' || pathname === '/user/signup') return;
+        // Do not fetch /auth/me on login, signup, or forgot password pages as it will unnecessarily return 401
+        if (pathname === '/user/login' || pathname === '/user/signup' || pathname === '/user/forgot-password') return;
 
         try {
             // The browser will automatically send the HttpOnly cookie
@@ -79,7 +79,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
 
     // Route protection — redirect to login if no stored user data
     useEffect(() => {
-        if (pathname !== '/user/login' && pathname !== '/user/signup') {
+        if (pathname !== '/user/login' && pathname !== '/user/signup' && pathname !== '/user/forgot-password') {
             const hasUserData = localStorage.getItem('user-data');
             if (!hasUserData) router.push('/user/login');
         }
@@ -89,7 +89,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
     // However, the Layout itself doesn't need to listen to socket events natively here yet, we will just wrap the provider.
 
     if (!mounted) return null;
-    if (pathname === '/user/login' || pathname === '/user/signup') return <>{children}</>;
+    if (pathname === '/user/login' || pathname === '/user/signup' || pathname === '/user/forgot-password') return <>{children}</>;
 
     const handleLogout = async () => {
         try {

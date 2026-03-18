@@ -28,6 +28,12 @@ async function apiCall(path: string, options: RequestInit = {}) {
 export const adminLogin = async (email: string, password: string) =>
     apiCall('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role: 'admin' }) });
 
+export const requestPasswordReset = async (email: string) =>
+    apiCall('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
+
+export const resetPasswordWithOTP = async (email: string, otp: string, newPassword: string) =>
+    apiCall('/auth/reset-password', { method: 'POST', body: JSON.stringify({ email, otp, newPassword }) });
+
 // ─── DASHBOARD ───────────────────────────────────────────
 
 export const getDashboardStats = async () => apiCall('/admin/dashboard');

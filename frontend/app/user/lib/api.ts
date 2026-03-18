@@ -43,6 +43,12 @@ export const verifyEmailOTP = async (email: string, otp: string) =>
 export const resendVerification = async (email: string) =>
     apiCall('/auth/resend-verification', { method: 'POST', body: JSON.stringify({ email }) });
 
+export const requestPasswordReset = async (email: string) =>
+    apiCall('/auth/forgot-password', { method: 'POST', body: JSON.stringify({ email }) });
+
+export const resetPasswordWithOTP = async (email: string, otp: string, newPassword: string) =>
+    apiCall('/auth/reset-password', { method: 'POST', body: JSON.stringify({ email, otp, newPassword }) });
+
 // ─── DASHBOARD ───────────────────────────────────────────
 
 export const getUserDashboard = async () => apiCall('/user/dashboard');

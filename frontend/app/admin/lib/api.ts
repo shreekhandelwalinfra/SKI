@@ -26,7 +26,7 @@ async function apiCall(path: string, options: RequestInit = {}) {
 // ─── AUTH ────────────────────────────────────────────────
 
 export const adminLogin = async (email: string, password: string) =>
-    apiCall('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    apiCall('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role: 'admin' }) });
 
 // ─── DASHBOARD ───────────────────────────────────────────
 

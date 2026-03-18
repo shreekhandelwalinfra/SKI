@@ -164,6 +164,8 @@ function UserSignupForm() {
     const [form, setForm] = useState({ name: '', email: '', phone: '', password: '', confirmPassword: '', referralCode: refCode });
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     // After successful register, switch to OTP screen
     const [otpEmail, setOtpEmail] = useState<string | null>(null);
 
@@ -283,12 +285,46 @@ function UserSignupForm() {
                                         { key: 'password', label: 'Password', type: 'password', span: 1 },
                                         { key: 'confirmPassword', label: 'Confirm Password', type: 'password', span: 1 },
                                         { key: 'referralCode', label: 'Referral Code (Optional)', type: 'text', span: 2 },
-                                    ].map(f => (
-                                        <div key={f.key} style={{ gridColumn: f.span === 2 ? 'span 2' : undefined }}>
-                                            <label className="text-tracked" style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>{f.label}</label>
-                                            <input type={f.type} value={(form as any)[f.key]} onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))} className="input" required={f.key !== 'referralCode'} readOnly={f.key === 'referralCode' && !!refCode} />
-                                        </div>
-                                    ))}
+                                    ].map(f => {
+                                        const isPassword = f.key === 'password';
+                                        const isConfirm = f.key === 'confirmPassword';
+                                        const showText = isPassword ? showPassword : (isConfirm ? showConfirmPassword : false);
+                                        const inputType = (isPassword || isConfirm) ? (showText ? 'text' : 'password') : f.type;
+
+                                        return (
+                                            <div key={f.key} style={{ gridColumn: f.span === 2 ? 'span 2' : undefined }}>
+                                                <label className="text-tracked" style={{ display: 'block', fontSize: '0.65rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>{f.label}</label>
+                                                <div style={{ position: 'relative' }}>
+                                                    <input
+                                                        type={inputType}
+                                                        value={(form as any)[f.key]}
+                                                        onChange={e => setForm(p => ({ ...p, [f.key]: e.target.value }))}
+                                                        className="input"
+                                                        style={(isPassword || isConfirm) ? { paddingRight: '2.5rem' } : undefined}
+                                                        required={f.key !== 'referralCode'}
+                                                        readOnly={f.key === 'referralCode' && !!refCode}
+                                                    />
+                                                    {(isPassword || isConfirm) && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => isPassword ? setShowPassword(!showPassword) : setShowConfirmPassword(!showConfirmPassword)}
+                                                            style={{
+                                                                position: 'absolute', right: '0.75rem', top: '50%', transform: 'translateY(-50%)',
+                                                                background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', padding: '0.25rem'
+                                                            }}
+                                                            title={showText ? "Hide password" : "Show password"}
+                                                        >
+                                                            {showText ? (
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                                                            ) : (
+                                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" /><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                                            )}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                                 <button type="submit" disabled={loading} className="btn btn-primary" style={{ width: '100%', borderRadius: '6px', marginTop: '1.5rem', opacity: loading ? 0.7 : 1 }}>
                                     {loading ? 'Creating Account...' : 'Create Account'}

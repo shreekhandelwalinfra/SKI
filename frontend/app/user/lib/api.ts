@@ -32,7 +32,7 @@ async function apiCall(path: string, options: RequestInit = {}) {
 // ─── AUTH ────────────────────────────────────────────────
 
 export const userLogin = async (email: string, password: string) =>
-    apiCall('/auth/login', { method: 'POST', body: JSON.stringify({ email, password }) });
+    apiCall('/auth/login', { method: 'POST', body: JSON.stringify({ email, password, role: 'user' }) });
 
 export const userSignup = async (data: { name: string; email: string; phone: string; password: string; referralCode?: string }) =>
     apiCall('/auth/register', { method: 'POST', body: JSON.stringify(data) });

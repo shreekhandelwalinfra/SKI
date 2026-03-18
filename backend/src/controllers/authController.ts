@@ -243,11 +243,20 @@ export const resendVerification = async (req: Request, res: Response): Promise<v
 
 export const login = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
 
         const user = await prisma.user.findUnique({ where: { email } });
         if (!user) {
             res.status(401).json({ status: 'error', message: 'Invalid credentials' });
+            return;
+        }
+
+        // Strict Role Check to prevent portal crossing
+        if (role && user.role.toLowerCase() !== role.toLowerCase()) {
+            res.status(403).json({
+                status: 'error',
+                message: `Access denied. `
+            });
             return;
         }
 

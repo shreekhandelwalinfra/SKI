@@ -2,6 +2,7 @@ import { Response } from 'express';
 import bcrypt from 'bcryptjs';
 import prisma from '../../config/database';
 import { AuthRequest } from '../../middleware/auth';
+import { broadcastSocketEvent } from '../../config/socket';
 
 // ─── PROFILE ─────────────────────────────────────────────
 
@@ -46,6 +47,10 @@ export const updateProfile = async (req: AuthRequest, res: Response): Promise<vo
         });
 
         const { password: _, ...userData } = user;
+
+        // Notify admins for real-time dashboard updates
+        broadcastSocketEvent('user:updated', { userId: user.id });
+
         res.status(200).json({ status: 'success', data: userData });
     } catch (error: any) {
         res.status(400).json({ status: 'error', message: error.message || 'Failed to update profile' });

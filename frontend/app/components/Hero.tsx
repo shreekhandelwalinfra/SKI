@@ -27,15 +27,21 @@ export default function Hero() {
             />
 
             {/* Content — centered */}
-            <div className="relative z-10 text-center w-full" style={{ padding: '120px 20px 60px' }}>
-                <div style={{ maxWidth: '720px', margin: '0 auto' }}>
+            <div className="relative z-10 text-center w-full flex flex-col items-center justify-center" style={{ padding: '120px 20px 60px' }}>
+                <div style={{
+                    maxWidth: '800px', margin: '0 auto',
+                    background: 'radial-gradient(ellipse at center, rgba(10,10,18,0.5) 0%, rgba(10,10,18,0) 70%)',
+                    padding: '40px 20px',
+                    borderRadius: '50px'
+                }}>
                     {/* Badge */}
-                    <div className="animate-fadeInUp" style={{ opacity: 0, animationDelay: '0.1s', marginBottom: '20px' }}>
+                    <div className="animate-fadeInUp" style={{ opacity: 0, animationDelay: '0.1s', marginBottom: '24px' }}>
                         <span style={{
-                            display: 'inline-block', padding: '5px 16px', borderRadius: '50px',
-                            background: 'rgba(196,149,106,0.08)', border: '1px solid rgba(196,149,106,0.25)',
-                            fontSize: '0.55rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-                            color: '#C4956A', fontWeight: 600, fontFamily: 'var(--font-inter), sans-serif',
+                            display: 'inline-block', padding: '6px 20px', borderRadius: '50px',
+                            background: 'rgba(196,149,106,0.1)', border: '1px solid rgba(196,149,106,0.3)',
+                            fontSize: '0.65rem', letterSpacing: '0.2em', textTransform: 'uppercase',
+                            color: '#e0b88a', fontWeight: 600, fontFamily: 'var(--font-inter), sans-serif',
+                            boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
                         }}>
                             Premium Real Estate Investments
                         </span>
@@ -44,26 +50,29 @@ export default function Hero() {
                     {/* Main Heading */}
                     <h1 className="animate-fadeInUp" style={{
                         fontFamily: 'var(--font-playfair), Georgia, serif',
-                        fontSize: 'clamp(2rem, 5.5vw, 4.5rem)',
+                        fontSize: 'clamp(2.5rem, 6vw, 5rem)',
                         fontWeight: 700, color: '#F5F0EB',
-                        lineHeight: 1.08, letterSpacing: '0.02em',
-                        marginBottom: '16px',
+                        lineHeight: 1.1, letterSpacing: '0.01em',
+                        marginBottom: '20px',
                         opacity: 0, animationDelay: '0.25s',
+                        textShadow: '0 4px 20px rgba(0,0,0,0.6)',
                     }}>
                         Shree Khandelwal<br />
-                        <span style={{ color: '#C4956A' }}>Infra</span>
+                        <span style={{ color: '#C4956A', fontStyle: 'normal', textShadow: '0 4px 15px rgba(196,149,106,0.2)' }}>Infra</span>
                     </h1>
 
                     {/* Subtitle */}
                     <p className="animate-fadeInUp" style={{
-                        fontSize: 'clamp(0.82rem, 2.5vw, 1rem)', color: 'rgba(245,240,235,0.55)', lineHeight: 1.7,
+                        fontSize: 'clamp(0.9rem, 2.5vw, 1.1rem)', color: 'rgba(245,240,235,0.9)', lineHeight: 1.8,
                         fontFamily: 'var(--font-inter), sans-serif',
-                        maxWidth: '440px', margin: '0 auto',
-                        marginBottom: '28px',
+                        maxWidth: '540px', margin: '0 auto',
+                        marginBottom: '36px',
                         opacity: 0, animationDelay: '0.4s',
+                        textShadow: '0 2px 10px rgba(0,0,0,0.8)',
+                        fontWeight: 500,
                     }}>
                         Your trusted gateway to verified land investments across
-                        Noida, Greater Noida, Jewar &amp; Mathura-Vrindavan.
+                        Noida, Greater Noida, Jewar & Mathura-Vrindavan.
                     </p>
 
                     {/* CTA Buttons */}

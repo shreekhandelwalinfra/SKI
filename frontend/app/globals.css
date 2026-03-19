@@ -308,8 +308,13 @@ img {
 }
 
 /* ============================================
-   Navbar
+   Navbar & Logo
    ============================================ */
+
+.brand-logo {
+  transition: filter 0.3s ease, transform 0.3s ease;
+  filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.4)) drop-shadow(0 0 1px rgba(255, 255, 255, 0.8));
+}
 
 .navbar-glass {
   background: rgba(255, 255, 255, 0.95);

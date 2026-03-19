@@ -16,7 +16,7 @@ const navLinks = [
 // Geometric SKI Logo SVG matching the reference diamond/hexagonal style
 function SKILogo() {
     return (
-        <img src="/logo.png" alt="SKI Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+        <img src="/logo.png" alt="SKI Logo" className="brand-logo" style={{ width: '85px', height: '85px', objectFit: 'contain' }} />
     );
 }
 
@@ -111,8 +111,10 @@ export default function Navbar() {
 
     return (
         <header
-            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'navbar-glass shadow-md' : 'bg-transparent'
-                }`}
+            className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${scrolled ? 'navbar-glass shadow-md' : ''}`}
+            style={{
+                background: scrolled ? undefined : 'linear-gradient(to bottom, rgba(10, 10, 18, 0.9) 0%, rgba(10, 10, 18, 0.4) 50%, transparent 100%)'
+            }}
         >
             <nav className="container-max flex items-center justify-between px-6 py-5">
                 {/* Logo */}
@@ -127,6 +129,7 @@ export default function Navbar() {
                             key={link.href}
                             href={link.href}
                             className="nav-link"
+                            style={!scrolled ? { color: 'rgba(255, 255, 255, 0.75)', textShadow: '0 2px 4px rgba(0,0,0,0.5)' } : {}}
                         >
                             {link.label}
                         </Link>
@@ -136,7 +139,7 @@ export default function Navbar() {
                     <button
                         onClick={toggleTheme}
                         className="p-2 rounded-full transition-all"
-                        style={{ color: 'var(--text-muted)' }}
+                        style={{ color: !scrolled ? 'rgba(255, 255, 255, 0.75)' : 'var(--text-muted)' }}
                         aria-label="Toggle theme"
                     >
                         {theme === 'dark' ? (
@@ -272,7 +275,14 @@ export default function Navbar() {
                                 <Link
                                     href="/user/login"
                                     className="nav-link px-3 py-1.5 transition-all"
-                                    style={{ fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', fontWeight: 600, color: 'rgba(245,240,235,0.55)' }}
+                                    style={{
+                                        fontSize: '0.7rem',
+                                        letterSpacing: '0.1em',
+                                        textTransform: 'uppercase',
+                                        fontWeight: 600,
+                                        color: !scrolled ? 'rgba(255, 255, 255, 0.75)' : undefined,
+                                        textShadow: !scrolled ? '0 2px 4px rgba(0,0,0,0.5)' : undefined
+                                    }}
                                 >
                                     Login
                                 </Link>

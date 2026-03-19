@@ -106,10 +106,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                                     border: '1px solid rgba(196,149,106,0.35)',
                                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 }}>
-                                    <svg width="22" height="22" viewBox="0 0 40 40" fill="none">
-                                        <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="#C4956A" strokeWidth="1.5" />
-                                        <text x="20" y="23" textAnchor="middle" fontFamily="Georgia,serif" fontSize="10" fontWeight="700" fill="#C4956A" letterSpacing="1">SKI</text>
-                                    </svg>
+                                    <img src="/logo.png" alt="SKI Logo" style={{ width: '33px', height: '33px', objectFit: 'contain' }} />
                                 </div>
                                 <div>
                                     <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F5F0EB', letterSpacing: '0.05em', fontFamily: 'var(--font-playfair), Georgia, serif' }}>SKI Admin</div>

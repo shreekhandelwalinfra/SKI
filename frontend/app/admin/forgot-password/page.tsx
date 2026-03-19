@@ -90,11 +90,7 @@ function AdminForgotPasswordForm() {
                 {/* Hex grid pattern */}
                 <div style={{ position: 'absolute', inset: 0, opacity: 0.03, backgroundImage: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' stroke=\'%23C4956A\' stroke-width=\'0.5\'%3E%3Cpath d=\'M30 5L55 17.5V42.5L30 55L5 42.5V17.5L30 5Z\'/%3E%3C/g%3E%3C/svg%3E")', backgroundSize: '60px 60px' }} />
                 <div className="animate-fadeInUp" style={{ position: 'relative', textAlign: 'center', padding: '3rem', maxWidth: '420px' }}>
-                    <svg width="80" height="80" viewBox="0 0 40 40" fill="none" style={{ margin: '0 auto 2rem' }}>
-                        <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="var(--accent-copper)" strokeWidth="1.5" />
-                        <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" stroke="var(--accent-copper)" strokeWidth="1" opacity="0.3" />
-                        <text x="20" y="23" textAnchor="middle" fontFamily="Georgia, serif" fontSize="10" fontWeight="700" fill="var(--accent-copper)" letterSpacing="1">SKI</text>
-                    </svg>
+                    <img src="/logo.png" alt="SKI Logo" style={{ width: '120px', height: '120px', objectFit: 'contain', margin: '0 auto 2rem' }} />
                     <h2 className="heading-serif" style={{ fontSize: '2rem', color: 'var(--navy-text)', marginBottom: '0.5rem' }}>Admin Recovery</h2>
                     <div className="text-tracked" style={{ fontSize: '0.65rem', color: 'var(--accent-copper)', marginBottom: '1.5rem' }}>Shree Khandelwal Infra</div>
                     <div className="copper-line copper-line-center" style={{ marginBottom: '1.5rem' }} />

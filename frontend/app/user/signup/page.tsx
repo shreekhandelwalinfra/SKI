@@ -211,11 +211,7 @@ function UserSignupForm() {
         <div className="hidden lg:flex" style={{ width: '40%', background: 'var(--navy)', position: 'relative', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 20% 30%, var(--accent-copper) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
             <div className="animate-fadeInUp" style={{ position: 'relative', textAlign: 'center', padding: '3rem', maxWidth: '380px' }}>
-                <svg width="64" height="64" viewBox="0 0 40 40" fill="none" style={{ margin: '0 auto 2rem' }}>
-                    <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="var(--accent-copper)" strokeWidth="1.5" />
-                    <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" stroke="var(--accent-copper)" strokeWidth="1" opacity="0.4" />
-                    <text x="20" y="23" textAnchor="middle" fontFamily="Georgia, serif" fontSize="10" fontWeight="700" fill="var(--accent-copper)" letterSpacing="1">SKI</text>
-                </svg>
+                <img src="/logo.png" alt="SKI Logo" style={{ width: '96px', height: '96px', objectFit: 'contain', margin: '0 auto 2rem' }} />
                 <h2 className="heading-serif" style={{ fontSize: '2rem', color: 'var(--navy-text)', marginBottom: '0.75rem' }}>
                     {otpEmail ? 'Almost There!' : 'Join SKI Family'}
                 </h2>

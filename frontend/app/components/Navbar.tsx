@@ -16,36 +16,7 @@ const navLinks = [
 // Geometric SKI Logo SVG matching the reference diamond/hexagonal style
 function SKILogo() {
     return (
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* Outer hexagonal shape */}
-            <path
-                d="M20 2L35 10V30L20 38L5 30V10L20 2Z"
-                stroke="var(--accent-copper)"
-                strokeWidth="1.5"
-                fill="none"
-            />
-            {/* Inner geometric diamond */}
-            <path
-                d="M20 8L30 14V26L20 32L10 26V14L20 8Z"
-                stroke="var(--accent-copper)"
-                strokeWidth="1"
-                fill="none"
-                opacity="0.6"
-            />
-            {/* SKI letters */}
-            <text
-                x="20"
-                y="23"
-                textAnchor="middle"
-                fontFamily="var(--font-playfair), Georgia, serif"
-                fontSize="10"
-                fontWeight="700"
-                fill="var(--accent-copper)"
-                letterSpacing="1"
-            >
-                SKI
-            </text>
-        </svg>
+        <img src="/logo.png" alt="SKI Logo" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
     );
 }
 

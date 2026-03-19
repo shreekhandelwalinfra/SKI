@@ -117,11 +117,7 @@ export default function UserLayout({ children }: { children: ReactNode }) {
                         {/* Brand */}
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
                             <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <svg width="36" height="36" viewBox="0 0 40 40" fill="none">
-                                    <path d="M20 2L35 10V30L20 38L5 30V10L20 2Z" stroke="var(--accent-copper)" strokeWidth="1.5" />
-                                    <path d="M20 8L30 14V26L20 32L10 26V14L20 8Z" stroke="var(--accent-copper)" strokeWidth="1" opacity="0.4" />
-                                    <text x="20" y="23" textAnchor="middle" fontFamily="Georgia, serif" fontSize="10" fontWeight="700" fill="var(--accent-copper)" letterSpacing="1">SKI</text>
-                                </svg>
+                                <img src="/logo.png" alt="SKI Logo" style={{ width: '54px', height: '54px', objectFit: 'contain' }} />
                                 <div>
                                     <div className="heading-serif" style={{ fontSize: '0.9rem', color: 'var(--text-heading)', letterSpacing: '0.05em' }}>Shree Khandelwal</div>
                                     <div className="text-tracked" style={{ fontSize: '0.6rem', color: 'var(--accent-copper)' }}>My Account</div>

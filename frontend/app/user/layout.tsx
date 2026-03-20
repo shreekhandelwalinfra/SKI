@@ -39,9 +39,10 @@ export default function UserLayout({ children }: { children: ReactNode }) {
         if (pathname === '/user/login' || pathname === '/user/signup' || pathname === '/user/forgot-password') return;
 
         try {
-            // The browser will automatically send the HttpOnly cookie
+            const token = localStorage.getItem('ski-token');
             const res = await fetch(`${API_BASE}/auth/me`, {
-                credentials: 'include'
+                credentials: 'include',
+                headers: token ? { Authorization: `Bearer ${token}` } : {}
             });
             if (!res.ok) return;
             const json = await res.json();
@@ -77,13 +78,27 @@ export default function UserLayout({ children }: { children: ReactNode }) {
         refreshUserData();
     }, [refreshUserData]);
 
-    // Route protection — redirect to login if no stored user data
+    // Route protection — redirect to login if no stored user data or token
     useEffect(() => {
         if (pathname !== '/user/login' && pathname !== '/user/signup' && pathname !== '/user/forgot-password') {
             const hasUserData = localStorage.getItem('user-data');
-            if (!hasUserData) router.push('/user/login');
+            const hasToken = localStorage.getItem('ski-token');
+            if (!hasUserData || !hasToken) router.push('/user/login');
         }
     }, [pathname, router]);
+
+    // Global logout listener for 401 errors
+    useEffect(() => {
+        const handleLogoutEvent = () => {
+            localStorage.removeItem('user-data');
+            localStorage.removeItem('ski-token');
+            setUserStatus('');
+            setUserName('');
+            router.push('/user/login');
+        };
+        window.addEventListener('ski-logout', handleLogoutEvent);
+        return () => window.removeEventListener('ski-logout', handleLogoutEvent);
+    }, [router]);
 
     // No longer connecting local socket, just importing the logic conceptually for later refactor on individual pages, or grabbing global hook if needed.
     // However, the Layout itself doesn't need to listen to socket events natively here yet, we will just wrap the provider.
@@ -116,16 +131,16 @@ export default function UserLayout({ children }: { children: ReactNode }) {
 
                         {/* Brand */}
                         <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
-                            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                                <img src="/logo.png" alt="SKI Logo" style={{ width: '54px', height: '54px', objectFit: 'contain' }} />
-                                <div>
-                                    <div className="heading-serif" style={{ fontSize: '0.9rem', color: 'var(--text-heading)', letterSpacing: '0.05em' }}>Shree Khandelwal</div>
-                                    <div className="text-tracked" style={{ fontSize: '0.6rem', color: 'var(--accent-copper)' }}>My Account</div>
+                            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', textDecoration: 'none' }}>
+                                <img src="/logo.png" alt="SKI Logo" className="brand-logo" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '4px' }}>
+                                    <div className="heading-serif" style={{ fontSize: '0.85rem', color: 'var(--text-heading)', letterSpacing: '0.05em', lineHeight: 1.2 }}>Shree Khandelwal<br />Infra</div>
+                                    <div className="text-tracked" style={{ fontSize: '0.62rem', color: 'var(--accent-copper)', marginTop: '2px' }}>My Account</div>
                                 </div>
                             </Link>
 
                             {/* Back to Home Breadcrumb */}
-                            <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border-subtle)' }}>
+                            <div style={{ marginTop: '1.25rem', paddingTop: '1.25rem', borderTop: '1px solid var(--border-subtle)' }}>
                                 <Link href="/"
                                     style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-inter), sans-serif', fontSize: '0.75rem', textDecoration: 'none', transition: 'color 0.2s ease', fontWeight: 500 }}
                                 >

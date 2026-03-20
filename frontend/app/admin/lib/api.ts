@@ -19,7 +19,14 @@ async function apiCall(path: string, options: RequestInit = {}) {
         },
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.message || 'Request failed');
+    if (!res.ok) {
+        if (res.status === 401) {
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('ski-logout'));
+            }
+        }
+        throw new Error(data.message || 'Request failed');
+    }
     return data;
 }
 

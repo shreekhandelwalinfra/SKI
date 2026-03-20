@@ -211,7 +211,7 @@ function UserSignupForm() {
         <div className="hidden lg:flex" style={{ width: '40%', background: 'var(--navy)', position: 'relative', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
             <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 20% 30%, var(--accent-copper) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
             <div className="animate-fadeInUp" style={{ position: 'relative', textAlign: 'center', padding: '3rem', maxWidth: '380px' }}>
-                <img src="/logo.png" alt="SKI Logo" style={{ width: '96px', height: '96px', objectFit: 'contain', margin: '0 auto 2rem' }} />
+                <img src="/logo.png" alt="SKI Logo" className="brand-logo" style={{ width: '96px', height: '96px', objectFit: 'contain', margin: '0 auto 2rem' }} />
                 <h2 className="heading-serif" style={{ fontSize: '2rem', color: 'var(--navy-text)', marginBottom: '0.75rem' }}>
                     {otpEmail ? 'Almost There!' : 'Join SKI Family'}
                 </h2>

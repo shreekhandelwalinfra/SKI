@@ -20,6 +20,11 @@ async function apiCall(path: string, options: RequestInit = {}) {
     });
     const data = await res.json();
     if (!res.ok) {
+        if (res.status === 401) {
+            if (typeof window !== 'undefined') {
+                window.dispatchEvent(new Event('ski-logout'));
+            }
+        }
         // Attach all response fields (e.g. unverified, email) to the error object
         // so callers can detect special cases like unverified email
         const err: any = new Error(data.message || 'Request failed');

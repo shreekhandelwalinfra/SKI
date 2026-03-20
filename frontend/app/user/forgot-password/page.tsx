@@ -89,7 +89,7 @@ function ForgotPasswordForm() {
             <div className="hidden lg:flex" style={{ width: '45%', background: 'var(--navy)', position: 'relative', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
                 <div style={{ position: 'absolute', inset: 0, opacity: 0.04, backgroundImage: 'radial-gradient(circle at 20% 30%, var(--accent-copper) 1px, transparent 1px)', backgroundSize: '32px 32px' }} />
                 <div className="animate-fadeInUp" style={{ position: 'relative', textAlign: 'center', padding: '3rem', maxWidth: '420px' }}>
-                    <img src="/logo.png" alt="SKI Logo" style={{ width: '96px', height: '96px', objectFit: 'contain', margin: '0 auto 2rem' }} />
+                    <img src="/logo.png" alt="SKI Logo" className="brand-logo" style={{ width: '96px', height: '96px', objectFit: 'contain', margin: '0 auto 2rem' }} />
                     <h2 className="heading-serif" style={{ fontSize: '2.5rem', color: 'var(--navy-text)', marginBottom: '1rem' }}>Account Recovery</h2>
                     <div className="copper-line copper-line-center" style={{ marginBottom: '1.5rem' }} />
                     <p style={{ fontSize: '1rem', lineHeight: 1.8, color: 'rgba(245,240,235,0.6)', fontFamily: 'var(--font-inter), sans-serif' }}>

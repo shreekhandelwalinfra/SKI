@@ -56,9 +56,20 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         setMounted(true);
         if (pathname !== '/admin/login' && pathname !== '/admin/forgot-password') {
             const hasAdminData = localStorage.getItem('admin-user');
-            if (!hasAdminData) router.push('/admin/login');
+            const hasToken = localStorage.getItem('ski-admin-token');
+            if (!hasAdminData || !hasToken) router.push('/admin/login');
         }
     }, [pathname, router]);
+
+    useEffect(() => {
+        const handleLogoutEvent = () => {
+            localStorage.removeItem('admin-user');
+            localStorage.removeItem('ski-admin-token');
+            router.push('/admin/login');
+        };
+        window.addEventListener('ski-logout', handleLogoutEvent);
+        return () => window.removeEventListener('ski-logout', handleLogoutEvent);
+    }, [router]);
 
     if (!mounted) return null;
     if (pathname === '/admin/login' || pathname === '/admin/forgot-password') return <>{children}</>;
@@ -97,20 +108,13 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
                             borderRight: '1px solid var(--admin-border)',
                         }}
                     >
-                        {/* Brand */}
-                        <div style={{ padding: '1.5rem 1.25rem', borderBottom: '1px solid var(--admin-border)' }}>
-                            <Link href="/" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', textDecoration: 'none' }}>
-                                <div style={{
-                                    width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
-                                    background: 'linear-gradient(135deg, rgba(196,149,106,0.2), rgba(27,42,74,0.4))',
-                                    border: '1px solid rgba(196,149,106,0.35)',
-                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                                }}>
-                                    <img src="/logo.png" alt="SKI Logo" style={{ width: '33px', height: '33px', objectFit: 'contain' }} />
-                                </div>
-                                <div>
-                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F5F0EB', letterSpacing: '0.05em', fontFamily: 'var(--font-playfair), Georgia, serif' }}>SKI Admin</div>
-                                    <div style={{ fontSize: '0.6rem', color: '#C4956A', letterSpacing: '0.2em', textTransform: 'uppercase', fontFamily: 'var(--font-inter), sans-serif' }}>Control Panel</div>
+                        {/* Brand & Back */}
+                        <div style={{ padding: '1.5rem', borderBottom: '1px solid var(--border-color)' }}>
+                            <Link href="/admin/dashboard" style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', textDecoration: 'none' }}>
+                                <img src="/logo.png" alt="SKI Logo" className="brand-logo" style={{ width: '64px', height: '64px', objectFit: 'contain' }} />
+                                <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center', marginTop: '4px' }}>
+                                    <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#F5F0EB', letterSpacing: '0.05em', fontFamily: 'var(--font-playfair), Georgia, serif', lineHeight: 1.2 }}>SKI<br />Administrative</div>
+                                    <div style={{ fontSize: '0.62rem', color: 'var(--accent-copper)', letterSpacing: '0.1em', textTransform: 'uppercase', fontFamily: 'var(--font-inter), sans-serif', marginTop: '2px' }}>Control Panel</div>
                                 </div>
                             </Link>
                         </div>
